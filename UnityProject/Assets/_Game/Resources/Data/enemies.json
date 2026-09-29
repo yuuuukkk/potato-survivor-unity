@@ -1,0 +1,78 @@
+{
+  "enemies": [
+    {
+      "id": "chaser", "displayName": "绿皮小怪", "behavior": 0,
+      "maxHp": 8, "moveSpeed": 1.6, "contactDamage": 8,
+      "ranged": false, "rangedDamage": 0, "rangedInterval": 0, "projectileSpeed": 0, "projectileCount": 1,
+      "explodeRadius": 0, "splitCount": 0, "splitEnemyId": "",
+      "materialDropMin": 1, "materialDropMax": 2,
+      "expReward": 2,
+      "color": "#6FBF4A", "radius": 0.45, "spawnWeight": 100, "isBoss": false, "isElite": false
+    },
+    {
+      "id": "ranger", "displayName": "紫皮射手", "behavior": 1,
+      "maxHp": 6, "moveSpeed": 1.2, "contactDamage": 4,
+      "ranged": true, "rangedDamage": 5, "rangedInterval": 2.2, "projectileSpeed": 5.5, "projectileCount": 1,
+      "explodeRadius": 0, "splitCount": 0, "splitEnemyId": "",
+      "materialDropMin": 2, "materialDropMax": 3,
+      "expReward": 3,
+      "color": "#A06FE0", "radius": 0.42, "spawnWeight": 35, "isBoss": false, "isElite": false
+    },
+    {
+      "id": "exploder", "displayName": "红皮自爆", "behavior": 2,
+      "maxHp": 5, "moveSpeed": 2.6, "contactDamage": 14,
+      "ranged": false, "rangedDamage": 0, "rangedInterval": 0, "projectileSpeed": 0, "projectileCount": 1,
+      "explodeRadius": 1.5, "splitCount": 0, "splitEnemyId": "",
+      "materialDropMin": 1, "materialDropMax": 2,
+      "expReward": 3,
+      "color": "#E05555", "radius": 0.42, "spawnWeight": 25, "isBoss": false, "isElite": false
+    },
+    {
+      "id": "tank", "displayName": "铁皮坦克", "behavior": 3,
+      "maxHp": 30, "moveSpeed": 0.8, "contactDamage": 14,
+      "ranged": false, "rangedDamage": 0, "rangedInterval": 0, "projectileSpeed": 0, "projectileCount": 1,
+      "explodeRadius": 0, "splitCount": 0, "splitEnemyId": "",
+      "materialDropMin": 3, "materialDropMax": 5,
+      "expReward": 6,
+      "color": "#7A8A99", "radius": 0.6, "spawnWeight": 15, "isBoss": false, "isElite": false
+    },
+    {
+      "id": "splitter", "displayName": "分裂怪", "behavior": 4,
+      "maxHp": 12, "moveSpeed": 1.4, "contactDamage": 6,
+      "ranged": false, "rangedDamage": 0, "rangedInterval": 0, "projectileSpeed": 0, "projectileCount": 1,
+      "explodeRadius": 0, "splitCount": 2, "splitEnemyId": "chaser",
+      "materialDropMin": 2, "materialDropMax": 3,
+      "expReward": 3,
+      "color": "#55C4C4", "radius": 0.42, "spawnWeight": 20, "isBoss": false, "isElite": false
+    },
+    {
+      "id": "elite_chaser", "displayName": "精英近战", "behavior": 0,
+      "maxHp": 40, "moveSpeed": 2.0, "contactDamage": 16,
+      "ranged": false, "rangedDamage": 0, "rangedInterval": 0, "projectileSpeed": 0, "projectileCount": 1,
+      "explodeRadius": 0, "splitCount": 0, "splitEnemyId": "",
+      "materialDropMin": 6, "materialDropMax": 10,
+      "expReward": 12,
+      "color": "#D96FE0", "radius": 0.6, "spawnWeight": 0, "isBoss": false, "isElite": true
+    },
+    {
+      "id": "boss1", "displayName": "土豆屠夫", "behavior": 5,
+      "maxHp": 2200, "moveSpeed": 1.0, "contactDamage": 20,
+      "ranged": true, "rangedDamage": 6, "rangedInterval": 1.5, "projectileSpeed": 4.2, "projectileCount": 8,
+      "bossAttackPattern": 0, "bossWarningRadiusMultiplier": 1.0, "bossImpactRadius": 1.8, "bossAttackDamage": 24,
+      "explodeRadius": 0, "splitCount": 0, "splitEnemyId": "",
+      "materialDropMin": 40, "materialDropMax": 60,
+      "expReward": 60,
+      "color": "#B04545", "radius": 0.45, "spawnWeight": 0, "isBoss": true, "isElite": false
+    },
+    {
+      "id": "boss2", "displayName": "土豆魔王", "behavior": 5,
+      "maxHp": 3200, "moveSpeed": 1.1, "contactDamage": 26,
+      "ranged": true, "rangedDamage": 8, "rangedInterval": 1.3, "projectileSpeed": 4.5, "projectileCount": 10,
+      "bossAttackPattern": 1, "bossWarningRadiusMultiplier": 1.0, "bossImpactRadius": 1.8, "bossAttackDamage": 24,
+      "explodeRadius": 0, "splitCount": 0, "splitEnemyId": "",
+      "materialDropMin": 60, "materialDropMax": 80,
+      "expReward": 90,
+      "color": "#4527A0", "radius": 0.48, "spawnWeight": 0, "isBoss": true, "isElite": false
+    }
+  ]
+}

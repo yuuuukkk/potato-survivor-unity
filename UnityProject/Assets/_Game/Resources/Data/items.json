@@ -1,0 +1,200 @@
+{
+  "items": [
+    {
+      "id": "heal_pack", "displayName": "急救包", "rarity": 0, "basePrice": 10, "maxStack": 1,
+      "isConsumable": true, "healAmount": 30,
+      "description": "立即回复 30 HP。消耗品，不占背包。",
+      "modifiers": []
+    },
+    {
+      "id": "knockback_coil", "displayName": "击退线圈", "rarity": 1, "basePrice": 24, "maxStack": 4,
+      "description": "攻击附带击退 +2。可叠加。",
+      "modifiers": [{ "type": 13, "flat": 2, "percent": 0 }]
+    },
+    {
+      "id": "glass_cannon", "displayName": "玻璃大炮", "rarity": 2, "basePrice": 42, "maxStack": 2,
+      "description": "伤害 +30%，最大生命 -20%。高风险高收益。",
+      "modifiers": [
+        { "type": 4, "flat": 0.30, "percent": 0 },
+        { "type": 0, "flat": -20, "percent": 0 }
+      ]
+    },
+    {
+      "id": "lucky_clover", "displayName": "幸运草", "rarity": 0, "basePrice": 12, "maxStack": 5,
+      "description": "幸运 +2，商店更容易出高稀有度。",
+      "modifiers": [
+        { "type": 11, "flat": 2, "percent": 0 }
+      ]
+    },
+    {
+      "id": "iron_helmet", "displayName": "铁头盔", "rarity": 1, "basePrice": 18, "maxStack": 3,
+      "description": "护甲 +4，移速 -6%。",
+      "modifiers": [
+        { "type": 2, "flat": 4, "percent": 0 },
+        { "type": 9, "flat": -0.06, "percent": 0 }
+      ]
+    },
+    {
+      "id": "stim", "displayName": "兴奋剂", "rarity": 2, "basePrice": 38, "maxStack": 3,
+      "description": "攻速 +25%，生命偷取 -50%（最低为 0）。",
+      "modifiers": [
+        { "type": 5, "flat": 0.25, "percent": 0 },
+        { "type": 10, "flat": -0.5, "percent": 0 }
+      ]
+    },
+    {
+      "id": "thorn", "displayName": "荆棘甲", "rarity": 1, "basePrice": 22, "maxStack": 3,
+      "description": "最大生命 +25，移速 -4%。坦克化。",
+      "modifiers": [
+        { "type": 0, "flat": 25, "percent": 0 },
+        { "type": 9, "flat": -0.04, "percent": 0 }
+      ]
+    },
+    {
+      "id": "boots", "displayName": "疾跑鞋", "rarity": 0, "basePrice": 14, "maxStack": 3,
+      "description": "移速 +15%，最大生命 -10。",
+      "modifiers": [
+        { "type": 9, "flat": 0.15, "percent": 0 },
+        { "type": 0, "flat": -10, "percent": 0 }
+      ]
+    },
+    {
+      "id": "bandage", "displayName": "绷带", "rarity": 0, "basePrice": 10, "maxStack": 5,
+      "description": "每秒回复 1 HP。",
+      "modifiers": [
+        { "type": 1, "flat": 1, "percent": 0 }
+      ]
+    },
+    {
+      "id": "medkit", "displayName": "医疗包", "rarity": 1, "basePrice": 26, "maxStack": 3,
+      "description": "每秒回复 3 HP，最大生命 +10，移速 -3%。",
+      "modifiers": [
+        { "type": 1, "flat": 3, "percent": 0 },
+        { "type": 0, "flat": 10, "percent": 0 },
+        { "type": 9, "flat": -0.03, "percent": 0 }
+      ]
+    },
+    {
+      "id": "scope", "displayName": "瞄准镜", "rarity": 2, "basePrice": 44, "maxStack": 3,
+      "description": "射程 +30%，暴击率 +5%，攻速 -8%。",
+      "modifiers": [
+        { "type": 8, "flat": 0.30, "percent": 0 },
+        { "type": 6, "flat": 0.05, "percent": 0 },
+        { "type": 5, "flat": -0.08, "percent": 0 }
+      ]
+    },
+    {
+      "id": "crit_stone", "displayName": "暴击石", "rarity": 1, "basePrice": 24, "maxStack": 4,
+      "description": "暴击率 +8%，暴击伤害 +30%，最大生命 -10。",
+      "modifiers": [
+        { "type": 6, "flat": 0.08, "percent": 0 },
+        { "type": 7, "flat": 0.30, "percent": 0 },
+        { "type": 0, "flat": -10, "percent": 0 }
+      ]
+    },
+    {
+      "id": "vampiric", "displayName": "吸血鬼牙", "rarity": 2, "basePrice": 46, "maxStack": 3,
+      "description": "生命偷取 +8%，最大生命 -15。",
+      "modifiers": [
+        { "type": 10, "flat": 0.08, "percent": 0 },
+        { "type": 0, "flat": -15, "percent": 0 }
+      ]
+    },
+    {
+      "id": "battery", "displayName": "电池", "rarity": 1, "basePrice": 20, "maxStack": 4,
+      "description": "攻速 +15%，伤害 -5%。",
+      "modifiers": [
+        { "type": 5, "flat": 0.15, "percent": 0 },
+        { "type": 4, "flat": -0.05, "percent": 0 }
+      ]
+    },
+    {
+      "id": "armor_plate", "displayName": "合金板", "rarity": 2, "basePrice": 40, "maxStack": 3,
+      "description": "护甲 +6，移速 -8%。",
+      "modifiers": [
+        { "type": 2, "flat": 6, "percent": 0 },
+        { "type": 9, "flat": -0.08, "percent": 0 }
+      ]
+    },
+    {
+      "id": "lucky_ring", "displayName": "幸运戒指", "rarity": 3, "basePrice": 70, "maxStack": 2,
+      "description": "幸运 +5，暴击率 +5%，伤害 -5%。",
+      "modifiers": [
+        { "type": 11, "flat": 5, "percent": 0 },
+        { "type": 6, "flat": 0.05, "percent": 0 },
+        { "type": 4, "flat": -0.05, "percent": 0 }
+      ]
+    },
+    {
+      "id": "blood_orb", "displayName": "血球", "rarity": 3, "basePrice": 65, "maxStack": 2,
+      "description": "最大生命 +40，每秒回复 -1。",
+      "modifiers": [
+        { "type": 0, "flat": 40, "percent": 0 },
+        { "type": 1, "flat": -1, "percent": 0 }
+      ]
+    },
+    {
+      "id": "chaos_engine", "displayName": "混沌引擎", "rarity": 4, "basePrice": 130, "maxStack": 1,
+      "description": "伤害 +50%，攻速 +20%，最大生命 -30，移速 -10%。代价沉重的终极输出。",
+      "modifiers": [
+        { "type": 4, "flat": 0.50, "percent": 0 },
+        { "type": 5, "flat": 0.20, "percent": 0 },
+        { "type": 0, "flat": -30, "percent": 0 },
+        { "type": 9, "flat": -0.10, "percent": 0 }
+      ]
+    },
+    {
+      "id": "red_core", "displayName": "猩红核心", "rarity": 5, "basePrice": 180, "maxStack": 1,
+      "description": "伤害 +35%，暴击率 +10%，最大生命 +20。红色品质。",
+      "modifiers": [
+        { "type": 4, "flat": 0.35, "percent": 0 },
+        { "type": 6, "flat": 0.10, "percent": 0 },
+        { "type": 0, "flat": 20, "percent": 0 }
+      ]
+    },
+    {
+      "id": "red_surge", "displayName": "超载芯片", "rarity": 5, "basePrice": 165, "maxStack": 1,
+      "description": "攻速 +30%，移速 +12%，护甲 -4。红色品质。",
+      "modifiers": [
+        { "type": 5, "flat": 0.30, "percent": 0 },
+        { "type": 9, "flat": 0.12, "percent": 0 },
+        { "type": 2, "flat": -4, "percent": 0 }
+      ]
+    },
+    {
+      "id": "red_fortune", "displayName": "命运骰子", "rarity": 5, "basePrice": 150, "maxStack": 1,
+      "description": "幸运 +12，拾取范围 +1，最大生命 -15。红色品质。",
+      "modifiers": [
+        { "type": 11, "flat": 12, "percent": 0 },
+        { "type": 12, "flat": 1, "percent": 0 },
+        { "type": 0, "flat": -15, "percent": 0 }
+      ]
+    },
+    {
+      "id": "precision_sight", "displayName": "精密瞄具", "rarity": 2, "basePrice": 48, "maxStack": 3,
+      "description": "暴击率 +6%，攻击范围 +15%，攻速 -5%。",
+      "modifiers": [
+        { "type": 6, "flat": 0.06, "percent": 0 },
+        { "type": 8, "flat": 0.15, "percent": 0 },
+        { "type": 5, "flat": -0.05, "percent": 0 }
+      ]
+    },
+    {
+      "id": "runner_soles", "displayName": "轻羽鞋", "rarity": 1, "basePrice": 26, "maxStack": 3,
+      "description": "移速 +10%，拾取范围 +0.4。",
+      "modifiers": [
+        { "type": 9, "flat": 0.10, "percent": 0 },
+        { "type": 12, "flat": 0.4, "percent": 0 }
+      ]
+    },
+    {
+      "id": "vitality_tonic", "displayName": "活力药剂", "rarity": 2, "basePrice": 42, "maxStack": 2,
+      "description": "最大生命 +30，每秒回复 +1.5，幸运 -2。",
+      "modifiers": [
+        { "type": 0, "flat": 30, "percent": 0 },
+        { "type": 1, "flat": 1.5, "percent": 0 },
+        { "type": 11, "flat": -2, "percent": 0 }
+      ]
+    }
+  ]
+}

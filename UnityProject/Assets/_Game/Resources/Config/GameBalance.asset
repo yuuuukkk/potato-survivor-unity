@@ -1,0 +1,236 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: df57590e76ea408884dcce4739f2922d, type: 3}
+  m_Name: GameBalance
+  m_EditorClassIdentifier: 
+  waves:
+    waveCount: 20
+    waveDuration: 30
+    waveDurationStart: 20
+    waveDurationPerWave: 5
+    waveDurationCap: 60
+    finalWaveDuration: 90
+    budgetBase: 18
+    budgetPerWave: 12
+    hpGrowth: 1.22
+    dmgGrowth: 1.15
+    speedGrowth: 0.03
+    spawnIntervalBase: 1.2
+    spawnIntervalMin: 0.35
+    maxAliveBase: 20
+    maxAlivePerWave: 2
+    eliteStartWave: 3
+    bossWaves: 14000000
+    finalWaveBossCount: 1
+    waveBonusBase: 5
+    waveBonusPerWave: 3
+    refreshBase: 4
+    pricePerWave: 2
+    shopWeaponSlots: 3
+    shopItemSlots: 3
+    healBase: 15
+    healPerWave: 5
+    weaponMaxLevel: 4
+    upgradeDamagePerLevel: 0.5
+    upgradeAttackSpeedPerLevel: 0.08
+    upgradeDiscount: 0.8
+    rarityPriceMult:
+    - 1
+    - 1.8
+    - 3.2
+    - 5.5
+    - 9
+    - 16
+    rarityUnlockWave:
+    - 1
+    - 1
+    - 4
+    - 7
+    - 10
+    - 12
+    shopLevelUpWave: 4
+    rarityWeights:
+    - 50
+    - 30
+    - 15
+    - 4.5
+    - 0.8
+    - 0.1
+    luckWeightBonus: 0.4
+    shopTierChancePerWave:
+    - 0
+    - 6
+    - 2
+    - 0.23
+    - 0.12
+    - 0.55
+    shopTierFirstWave:
+    - 1
+    - 2
+    - 4
+    - 8
+    - 11
+    - 12
+    shopTierChanceCap:
+    - 100
+    - 60
+    - 25
+    - 8
+    - 3
+    - 5
+    expBaseToNext: 10
+    expGrowth: 1.45
+    upgradeStatWeight: 60
+    upgradeWeaponWeight: 25
+    upgradeItemWeight: 15
+    upgradeStatOptions:
+    - displayName: "\u751F\u547D\u4E0A\u9650 +10"
+      statType: 0
+      flat: 10
+      percent: 0
+    - displayName: "\u751F\u547D\u56DE\u590D +1/\u79D2"
+      statType: 1
+      flat: 1
+      percent: 0
+    - displayName: "\u62A4\u7532 +2"
+      statType: 2
+      flat: 2
+      percent: 0
+    - displayName: "\u95EA\u907F +3%"
+      statType: 3
+      flat: 0.03
+      percent: 0
+    - displayName: "\u4F24\u5BB3 +12%"
+      statType: 4
+      flat: 0
+      percent: 0.12
+    - displayName: "\u653B\u901F +10%"
+      statType: 5
+      flat: 0
+      percent: 0.1
+    - displayName: "\u66B4\u51FB\u7387 +5%"
+      statType: 6
+      flat: 0.05
+      percent: 0
+    - displayName: "\u66B4\u51FB\u4F24\u5BB3 +30%"
+      statType: 7
+      flat: 0.3
+      percent: 0
+    - displayName: "\u5C04\u7A0B +15%"
+      statType: 8
+      flat: 0
+      percent: 0.15
+    - displayName: "\u79FB\u901F +8%"
+      statType: 9
+      flat: 0
+      percent: 0.08
+    - displayName: "\u5438\u8840 +3%"
+      statType: 10
+      flat: 0.03
+      percent: 0
+    - displayName: "\u5E78\u8FD0 +2"
+      statType: 11
+      flat: 2
+      percent: 0
+    - displayName: "\u62FE\u53D6\u8303\u56F4 +0.5"
+      statType: 12
+      flat: 0.5
+      percent: 0
+  offerCount: 3
+  weaponOfferChance: 0.35
+  modificationOfferChance: 0.3
+  sellReturnRate: 0.5
+  refreshCostPerUse: 2
+  earlyShopGuaranteedWeapons: 2
+  midShopGuaranteedWeapons: 1
+  sameWeaponOfferChance: 0.2
+  sameKindOfferChance: 0.15
+  earlySameKindBonus: 0.15
+  earlySameKindBonusDecay: 0.03
+  rerollBasePerWave: 0.75
+  rerollIncreasePerWave: 0.4
+  shopPriceFlatPerWave: 1
+  shopPricePercentPerWave: 0.1
+  directorMaxBudgetMultiplier: 2.2
+  directorMaxAliveBonus: 12
+  directorMaxOpeningElites: 2
+  challengeShopInterval: 3
+  firstChallengeAfterWave: 1
+  directorChallengeTiers:
+  - displayName: I · 试探
+    budgetMultiplier: 1.1
+    spawnIntervalMultiplier: 0.97
+    maxAliveBonus: 1
+    openingEliteBonus: 0
+    rewardMaterials: 10
+  - displayName: II · 加压
+    budgetMultiplier: 1.25
+    spawnIntervalMultiplier: 0.9
+    maxAliveBonus: 3
+    openingEliteBonus: 0
+    rewardMaterials: 22
+  - displayName: III · 险战
+    budgetMultiplier: 1.45
+    spawnIntervalMultiplier: 0.82
+    maxAliveBonus: 5
+    openingEliteBonus: 0
+    rewardMaterials: 38
+  - displayName: IV · 豪赌
+    budgetMultiplier: 1.7
+    spawnIntervalMultiplier: 0.72
+    maxAliveBonus: 8
+    openingEliteBonus: 1
+    rewardMaterials: 60
+  targetFrameRate: -1
+  vSyncCount: 0
+  normalEnemyScale: 1.12
+  heldWeaponDistanceBonus: 0.1
+  maxEquippedModifications: 2
+  maxProjectileBounces: 5
+  ricochetExtraRangePerBounce: 1
+  maxProjectileSizeMultiplier: 2.5
+  charmTint: {r: 1, g: 0.55, b: 0.86, a: 1}
+  charmTargetRange: 12
+  charmAttackInterval: 0.5
+  charmRetargetInterval: 0.25
+  showFpsOverlay: 1
+  baseMaxHp: 100
+  baseCritDamageMultiplier: 2
+  basePickupRange: 1.6
+  baseMoveSpeed: 3.5
+  screenShakeScale: 0.75
+  playerHitShakeDuration: 0.17
+  playerHitShakeMagnitude: 0.105
+  playerHitFlashDuration: 0.22
+  playerHitTint: {r: 1, g: 0.38, b: 0.38, a: 1}
+  playerHitRecoilSpeed: 2.6
+  enemyHitFlashDuration: 0.12
+  enemyHitTint: {r: 1, g: 0.55, b: 0.35, a: 1}
+  enemyHitSquash: 0.16
+  enemyHitStunDuration: 0.055
+  impactDuration: 0.18
+  impactSize: 1
+  impactColor: {r: 1, g: 0.86, b: 0.47, a: 1}
+  impactShakeMagnitude: 0.025
+  impactMaxActive: 18
+  damageNumberMaxActive: 24
+  enemyHitSound: {fileID: 0}
+  criticalHitSound: {fileID: 0}
+  playerHitSound: {fileID: 0}
+  hitSoundVolume: 0.24
+  playerHitSoundVolume: 0.33
+  explosionVisualDuration: 0.28
+  explosionOuterColor: {r: 1, g: 0.38, b: 0.1, a: 0.48}
+  explosionInnerColor: {r: 1, g: 0.87, b: 0.55, a: 0.75}
+  explosionShakeMagnitude: 0.09
+  maxOrbits: 2
+  maxTurrets: 6

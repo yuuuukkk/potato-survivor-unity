@@ -1,0 +1,1198 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7293bfc5fb7c4516b89d0ae4ff144860, type: 3}
+  m_Name: GameContent
+  m_EditorClassIdentifier: 
+  weapons:
+  - id: pistol
+    projectilePrewarmCount: 8
+    heldVisualSize: 0.96
+    heldDistance: 0.12
+    displayName: "\u571F\u8C46\u624B\u67AA"
+    description: "\u6807\u51C6\u5355\u53D1\u624B\u67AA\uFF0C\u53EF\u9760\u7684\u57FA\u7840\u8F93\u51FA\u3002"
+    kind: 0
+    rarity: 0
+    basePrice: 15
+    damage: 10
+    attackInterval: 0.9
+    projectileCount: 1
+    spreadDeg: 0
+    projectileSpeed: 9
+    range: 6.5
+    pierce: 0
+    critChance: 0
+    critDamageMult: 2
+    explodeRadius: 0
+    bulletColor: '#FFE066'
+    bulletRadius: 0.12
+  - id: smg
+    projectilePrewarmCount: 20
+    heldVisualSize: 1.1
+    heldDistance: 0.12
+    displayName: "\u51B2\u950B\u67AA"
+    description: "\u9AD8\u5C04\u901F\u5355\u53D1\u5B50\u5F39\uFF0C\u6301\u7EED\u538B\u5236\u654C\u4EBA\u3002"
+    kind: 0
+    rarity: 1
+    basePrice: 28
+    damage: 4
+    attackInterval: 0.06
+    projectileCount: 1
+    spreadDeg: 0
+    projectileSpeed: 10
+    range: 5.2
+    pierce: 0
+    critChance: 0
+    critDamageMult: 2
+    explodeRadius: 0
+    bulletColor: '#7EC8E3'
+    bulletRadius: 0.1
+  - id: shotgun
+    projectilePrewarmCount: 12
+    heldVisualSize: 1.14
+    heldDistance: 0.14
+    displayName: "\u9730\u5F39\u67AA"
+    description: "\u4E94\u8FDE\u53D1\u6247\u5F62\u5F39\u5E55\uFF0C\u8D34\u8138\u8F93\u51FA\u7206\u70B8\u3002"
+    kind: 0
+    rarity: 2
+    basePrice: 55
+    damage: 6
+    attackInterval: 1.1
+    projectileCount: 5
+    spreadDeg: 32
+    projectileSpeed: 9
+    range: 4
+    pierce: 0
+    critChance: 0
+    critDamageMult: 2
+    explodeRadius: 0
+    bulletColor: '#E3B778'
+    bulletRadius: 0.11
+  - id: sniper
+    projectilePrewarmCount: 6
+    heldVisualSize: 1.4
+    heldDistance: 0.14
+    projectileVisualSize: 0.72
+    displayName: "\u571F\u8C46\u72D9\u51FB\u67AA"
+    description: "\u9AD8\u4F24\u9AD8\u7A7F\u900F\uFF0C\u4E00\u6761\u7EBF\u4E0A\u7684\u654C\u4EBA\u90FD\u4F1A\u906D\u6B83\u3002"
+    kind: 0
+    rarity: 2
+    basePrice: 60
+    damage: 48
+    attackInterval: 1.6
+    projectileCount: 1
+    spreadDeg: 0
+    projectileSpeed: 14
+    range: 9
+    pierce: 3
+    critChance: 0.15
+    critDamageMult: 2.5
+    explodeRadius: 0
+    bulletColor: '#9FE0A8'
+    bulletRadius: 0.13
+  - id: laser
+    projectilePrewarmCount: 16
+    heldVisualSize: 1.15
+    heldDistance: 0.14
+    displayName: "\u6FC0\u5149\u67AA"
+    description: "\u53D1\u5C04\u53EF\u7A7F\u900F\u7684\u76F4\u7EBF\u5149\u675F\uFF0C\u547D\u4E2D\u6CBF\u9014\u654C\u4EBA\u3002"
+    kind: 0
+    attackPattern: 2
+    laserBeamWidth: 0.24
+    patternEffectDuration: 0.12
+    rarity: 3
+    basePrice: 95
+    damage: 12
+    attackInterval: 0.45
+    projectileCount: 1
+    spreadDeg: 0
+    projectileSpeed: 12
+    range: 7
+    pierce: 99
+    critChance: 0.05
+    critDamageMult: 2
+    explodeRadius: 0
+    bulletColor: '#FF7A7A'
+    bulletRadius: 0.08
+  - id: rocket
+    projectilePrewarmCount: 6
+    heldVisualSize: 1.24
+    heldDistance: 0.16
+    displayName: "\u706B\u7BAD\u7B52"
+    description: "\u547D\u4E2D\u7206\u70B8\uFF0C\u5927\u8303\u56F4\u6E05\u573A\u3002"
+    kind: 0
+    rarity: 3
+    basePrice: 100
+    damage: 26
+    attackInterval: 1.8
+    projectileCount: 1
+    spreadDeg: 0
+    projectileSpeed: 6
+    range: 7.5
+    pierce: 0
+    critChance: 0
+    critDamageMult: 2
+    explodeRadius: 2.2
+    bulletColor: '#FF9F43'
+    bulletRadius: 0.32
+    projectileVisualSize: 0.7
+  - id: sword
+    projectilePrewarmCount: 0
+    heldVisualSize: 1.05
+    heldDistance: 0.15
+    displayName: "\u571F\u8C46\u5927\u5251"
+    description: "\u9762\u524D 120\xB0 \u6247\u5F62\u6325\u780D\uFF0C\u9AD8\u4F24\u5BB3\u9AD8\u98CE\u9669\u3002"
+    kind: 1
+    rarity: 0
+    basePrice: 16
+    damage: 22
+    attackInterval: 0.8
+    projectileCount: 1
+    spreadDeg: 0
+    projectileSpeed: 0
+    range: 2.2
+    pierce: 0
+    critChance: 0
+    critDamageMult: 2
+    explodeRadius: 0
+    bulletColor: '#C8C8C8'
+    bulletRadius: 0.14
+    meleeAnimation: 0
+    meleeAnimationDuration: 0.30
+    meleeSwingDegrees: 120
+    meleeThrustDistance: 0.8
+    meleeSwingOutwardDistance: 0.8
+    meleeHitWidth: 0.28
+    meleeHandleFraction: 0.18
+    meleeContactFraction: 0.5
+    meleeActiveStart: 0.22
+    meleeActiveEnd: 0.84
+  - id: fist
+    projectilePrewarmCount: 0
+    heldVisualSize: 0.56
+    heldDistance: 0.24
+    displayName: "\u62F3\u5957"
+    description: "\u6781\u901F\u8FD1\u6218\u8FDE\u51FB\uFF0C\u8D34\u8EAB\u8F93\u51FA\u4E4B\u738B\u3002"
+    kind: 1
+    rarity: 1
+    basePrice: 30
+    damage: 8
+    attackInterval: 0.25
+    projectileCount: 1
+    spreadDeg: 0
+    projectileSpeed: 0
+    range: 1.4
+    pierce: 0
+    critChance: 0
+    critDamageMult: 2
+    explodeRadius: 0
+    bulletColor: '#FF8A8A'
+    bulletRadius: 0.12
+    meleeAnimation: 1
+    meleeAnimationDuration: 0.16
+    meleeSwingDegrees: 20
+    meleeThrustDistance: 0.7
+    meleeSwingOutwardDistance: 0.42
+    meleeHitWidth: 0.38
+    meleeHandleFraction: 0.18
+    meleeContactFraction: 0.5
+    meleeActiveStart: 0.22
+    meleeActiveEnd: 0.80
+  - id: boomerang
+    projectilePrewarmCount: 4
+    heldVisualSize: 0.75
+    heldDistance: 0.12
+    displayName: "\u56DE\u65CB\u9556"
+    description: "\u6295\u63B7\u540E\u98DE\u56DE\u73A9\u5BB6\u8EAB\u8FB9\uFF0C\u53BB\u7A0B\u4E0E\u56DE\u7A0B\u90FD\u53EF\u547D\u4E2D\u3002"
+    kind: 4
+    rarity: 1
+    basePrice: 35
+    damage: 9
+    attackInterval: 1
+    projectileCount: 1
+    spreadDeg: 0
+    projectileSpeed: 7
+    range: 3.6
+    pierce: 0
+    critChance: 0
+    critDamageMult: 2
+    explodeRadius: 0
+    bulletColor: '#7EE39B'
+    bulletRadius: 0.30
+    projectileVisualSize: 0.68
+  - id: drone
+    projectilePrewarmCount: 12
+    heldVisualSize: 0.9
+    heldDistance: 0.12
+    displayName: "\u65E0\u4EBA\u673A"
+    description: "\u60AC\u6D6E\u5728\u73A9\u5BB6\u5468\u56F4\uFF0C\u81EA\u52A8\u7784\u51C6\u5E76\u5C04\u51FB\u3002"
+    kind: 3
+    rarity: 2
+    basePrice: 58
+    damage: 7
+    attackInterval: 0.5
+    projectileCount: 1
+    spreadDeg: 0
+    projectileSpeed: 10
+    range: 5
+    pierce: 0
+    critChance: 0
+    critDamageMult: 2
+    explodeRadius: 0
+    bulletColor: '#A89FE0'
+    bulletRadius: 0.12
+    projectileVisualSize: 0.38
+    droneOrbitRadius: 1.05
+    droneOrbitSpeed: 120
+    droneVisualSize: 0.9
+  - id: minigun
+    projectilePrewarmCount: 24
+    heldVisualSize: 1.25
+    heldDistance: 0.16
+    displayName: "\u52A0\u7279\u6797"
+    description: "\u4E09\u53D1\u6563\u5C04\u5F39\u5E55\uFF0C\u6BCF\u53D1\u90FD\u53EF\u7A7F\u900F\u3002"
+    kind: 0
+    rarity: 3
+    basePrice: 105
+    damage: 3
+    attackInterval: 0.18
+    projectileCount: 3
+    spreadDeg: 14
+    projectileSpeed: 11
+    range: 6
+    pierce: 1
+    critChance: 0.03
+    critDamageMult: 2
+    explodeRadius: 0
+    bulletColor: '#E3E37E'
+    bulletRadius: 0.08
+  - id: flamethrower
+    projectilePrewarmCount: 16
+    heldVisualSize: 1.16
+    heldDistance: 0.16
+    displayName: "\u706B\u7130\u55B7\u5C04\u5668"
+    description: "\u671D\u524D\u55B7\u51FA\u77ED\u8DDD\u79BB\u6247\u5F62\u706B\u7130\uFF0C\u53EF\u540C\u65F6\u70E7\u5230\u626D\u9762\u524D\u65B9\u7684\u654C\u4EBA\u3002"
+    kind: 0
+    attackPattern: 1
+    flameConeAngle: 52
+    patternEffectDuration: 0.18
+    rarity: 2
+    basePrice: 62
+    damage: 5
+    attackInterval: 0.18
+    projectileCount: 1
+    spreadDeg: 22
+    projectileSpeed: 7
+    range: 3.4
+    pierce: 2
+    critChance: 0
+    critDamageMult: 2
+    explodeRadius: 0
+    bulletColor: '#FF6B35'
+    bulletRadius: 0.12
+  weaponModifications:
+  - id: sword_focused_thrust
+    displayName: "\u78E8\u950B\uFF1A\u76F4\u523A"
+    description: "\u653E\u5F03\u5BBD\u5E45\u6A2A\u626B\uFF0C\u6539\u4E3A\u671D\u5411\u76EE\u6807\u7684\u524D\u523A\u3002"
+    aiHint: "\u7528\u4E8E\u60F3\u96C6\u4E2D\u653B\u51FB\u524D\u65B9\u76EE\u6807\u7684\u6784\u7B51\uFF1B\u4F1A\u653E\u5F03\u5BBD\u89D2\u626B\u51FB\u3002"
+    weaponId: sword
+    exclusiveGroup: sword_attack_form
+    kind: 0
+    meleeAnimation: 1
+    rarity: 2
+    price: 0
+    damageMultiplier: 1
+    attackIntervalMultiplier: 1
+  - id: sword_wave
+    displayName: 剑气：远斩
+    description: 挥砍时从剑尖放出穿透剑气；近身伤害 -30%，攻击间隔 +25%。
+    aiHint: 适合想拉开距离、清理成排敌人的剑构筑；牺牲贴身爆发与攻速。
+    weaponId: sword
+    exclusiveGroup: sword_attack_form
+    kind: 1
+    meleeAnimation: 0
+    rarity: 2
+    price: 32
+    damageMultiplier: 0.7
+    attackIntervalMultiplier: 1.25
+    waveDamageMultiplier: 0.75
+    waveSpeed: 9
+    waveRange: 5.5
+    wavePierce: 2
+  - id: fist_shock_pulse
+    displayName: 隔空拳：冲击波
+    description: 每次拳击从拳尖打出短程冲击波；拳击伤害 -30%，攻击间隔 +25%。
+    aiHint: 适合近战角色拉开一点距离处理直线上的敌人；贴身爆发降低。
+    weaponId: fist
+    exclusiveGroup: fist_attack_form
+    kind: 1
+    rarity: 2
+    price: 30
+    damageMultiplier: 0.7
+    attackIntervalMultiplier: 1.25
+    waveDamageMultiplier: 0.55
+    waveSpeed: 8
+    waveRange: 3.4
+    wavePierce: 1
+  - id: fist_heavy_pulse
+    displayName: 重拳：贯穿冲击
+    description: 拳尖打出短而强的冲击波，可贯穿更多敌人；攻击间隔 +50%，连续出拳变慢。
+    aiHint: 适合在密集敌群正面打出一条通路；放弃拳套原本的高频连击。
+    weaponId: fist
+    exclusiveGroup: fist_attack_form
+    kind: 1
+    rarity: 2
+    price: 34
+    damageMultiplier: 1
+    attackIntervalMultiplier: 1.5
+    waveDamageMultiplier: 0.9
+    waveSpeed: 7
+    waveRange: 2.2
+    wavePierce: 4
+  - id: pistol_ricochet
+    displayName: 折射弹：手枪
+    description: 子弹碰到场边最多反弹 2 次；基础伤害 -20%，攻击间隔 +10%，每次反弹后伤害再衰减 30%。
+    aiHint: 适合利用场边持续输出、处理侧后方敌人；单次直击伤害更低。
+    weaponId: pistol
+    exclusiveGroup: pistol_ricochet
+    kind: 2
+    rarity: 2
+    price: 30
+    damageMultiplier: 0.8
+    attackIntervalMultiplier: 1.1
+    extraBounces: 2
+    bounceDamageMultiplier: 0.7
+    projectileRangeMultiplier: 3.2
+  - id: pistol_piercing
+    displayName: 穿芯弹：手枪
+    description: 子弹额外穿透 2 个敌人；基础伤害 -35%，攻击间隔 +15%。
+    aiHint: 适合从敌群一侧打穿整排敌人；单体输出下降。
+    weaponId: pistol
+    exclusiveGroup: pistol_piercing
+    kind: 3
+    rarity: 2
+    price: 28
+    damageMultiplier: 0.65
+    attackIntervalMultiplier: 1.15
+    extraPierce: 2
+  - id: smg_ricochet
+    displayName: 跳弹：冲锋枪
+    description: 快速子弹碰壁反弹 1 次；基础伤害 -30%，攻击间隔 +20%，反弹后伤害再衰减 25%。
+    aiHint: 适合靠射速覆盖场边；失去部分近身火力。
+    weaponId: smg
+    exclusiveGroup: smg_ricochet
+    kind: 2
+    rarity: 2
+    price: 39
+    damageMultiplier: 0.7
+    attackIntervalMultiplier: 1.2
+    extraBounces: 1
+    bounceDamageMultiplier: 0.75
+    projectileRangeMultiplier: 3
+  - id: shotgun_ricochet
+    displayName: 反弹散射：霰弹枪
+    description: 每颗弹丸碰壁反弹 1 次；基础伤害 -40%，攻击间隔 +20%，反弹后伤害再衰减 25%。
+    aiHint: 适合利用墙边散射覆盖更大区域；近距离爆发明显降低。
+    weaponId: shotgun
+    exclusiveGroup: shotgun_ricochet
+    kind: 2
+    rarity: 2
+    price: 42
+    damageMultiplier: 0.6
+    attackIntervalMultiplier: 1.2
+    extraBounces: 1
+    bounceDamageMultiplier: 0.75
+    projectileRangeMultiplier: 4
+  - id: sniper_ricochet
+    displayName: 折线狙击
+    description: 狙击弹碰壁反弹 1 次；基础伤害 -25%，攻击间隔 +25%，反弹后伤害再衰减 20%。
+    aiHint: 适合沿长路径打穿多个方向的敌人；牺牲单点爆发。
+    weaponId: sniper
+    exclusiveGroup: sniper_ricochet
+    kind: 2
+    rarity: 3
+    price: 64
+    damageMultiplier: 0.75
+    attackIntervalMultiplier: 1.25
+    extraBounces: 1
+    bounceDamageMultiplier: 0.8
+    projectileRangeMultiplier: 2.5
+  - id: minigun_piercing
+    displayName: 穿甲链：加特林
+    description: 每颗子弹额外穿透 1 个敌人；基础伤害 -30%，攻击间隔 +25%。
+    aiHint: 适合对密集敌群持续扫射；牺牲射速和单体伤害。
+    weaponId: minigun
+    exclusiveGroup: minigun_piercing
+    kind: 3
+    rarity: 3
+    price: 72
+    damageMultiplier: 0.7
+    attackIntervalMultiplier: 1.25
+    extraPierce: 1
+  - id: minigun_ricochet
+    displayName: 反弹弹幕：加特林
+    description: 每颗子弹碰壁反弹 1 次；基础伤害 -45%，攻击间隔 +45%，反弹后伤害再衰减 30%。
+    aiHint: 适合用持续弹幕覆盖场边，但会明显牺牲正面火力和射速。
+    weaponId: minigun
+    exclusiveGroup: minigun_ricochet
+    kind: 2
+    rarity: 3
+    price: 76
+    damageMultiplier: 0.55
+    attackIntervalMultiplier: 1.45
+    extraBounces: 1
+    bounceDamageMultiplier: 0.7
+    projectileRangeMultiplier: 2.5
+  - id: pistol_charm
+    displayName: 魅惑弹：土豆手枪
+    description: 命中普通怪有 28% 概率魅惑 3 秒，令其转而攻击其他怪；手枪直击伤害 -20%，攻击间隔 +15%。精英与 Boss 免疫。
+    aiHint: 用暂时的敌转友换控制与分流，单体直击输出变弱。
+    weaponId: pistol
+    exclusiveGroup: pistol_charm
+    kind: 5
+    rarity: 2
+    price: 44
+    damageMultiplier: 0.8
+    attackIntervalMultiplier: 1.15
+    charmChance: 0.28
+    charmDuration: 3
+    charmDamagePerSecond: 8
+  - id: smg_charm
+    displayName: 糖衣弹：冲锋枪
+    description: 每颗子弹有 8% 概率魅惑普通怪 2 秒；伤害 -25%，攻击间隔 +15%。精英与 Boss 免疫。
+    aiHint: 用高射速频繁尝试控制敌群，但直击火力明显下降。
+    weaponId: smg
+    exclusiveGroup: smg_charm
+    kind: 5
+    rarity: 2
+    price: 49
+    damageMultiplier: 0.75
+    attackIntervalMultiplier: 1.15
+    charmChance: 0.08
+    charmDuration: 2
+    charmDamagePerSecond: 5
+  - id: pistol_big_round
+    displayName: 胖胖弹：土豆手枪
+    description: 手枪子弹图像和真实命中半径放大 60%；手枪伤害 -15%，攻击间隔 +20%。
+    aiHint: 更容易命中移动目标，但牺牲直击伤害和射速。
+    weaponId: pistol
+    exclusiveGroup: pistol_payload
+    kind: 4
+    rarity: 1
+    price: 31
+    damageMultiplier: 0.85
+    attackIntervalMultiplier: 1.2
+    projectileSizeMultiplier: 1.6
+  - id: shotgun_big_pellets
+    displayName: 肥弹丸：霰弹枪
+    description: 每颗弹丸放大 45%，更易覆盖目标；伤害 -20%，攻击间隔 +20%。
+    aiHint: 换更宽的覆盖和容错，失去部分贴脸爆发。
+    weaponId: shotgun
+    exclusiveGroup: shotgun_payload
+    kind: 4
+    rarity: 2
+    price: 43
+    damageMultiplier: 0.8
+    attackIntervalMultiplier: 1.2
+    projectileSizeMultiplier: 1.45
+  - id: sniper_heavy_round
+    displayName: 重型弹：土豆狙击枪
+    description: 狙击弹放大 75%，伤害 +25%；攻击间隔 +45%。
+    aiHint: 更重的单发与命中宽容，但漏掉目标后的等待更久。
+    weaponId: sniper
+    exclusiveGroup: sniper_payload
+    kind: 4
+    rarity: 3
+    price: 73
+    damageMultiplier: 1.25
+    attackIntervalMultiplier: 1.45
+    projectileSizeMultiplier: 1.75
+  - id: boomerang_return_surge
+    displayName: 回头见：回旋镖
+    description: 回程伤害 +80%、飞行速度 +35%；去程伤害 -20%，攻击间隔 +15%。
+    aiHint: 让回程成为主力，鼓励玩家绕位接回镖；去程较弱。
+    weaponId: boomerang
+    exclusiveGroup: boomerang_return
+    kind: 6
+    rarity: 2
+    price: 48
+    damageMultiplier: 0.8
+    attackIntervalMultiplier: 1.15
+    returnDamageMultiplier: 1.8
+    returnSpeedMultiplier: 1.35
+  - id: boomerang_courier
+    displayName: 顺路带货：回旋镖
+    description: 去程自动拾取沿途材料和经验；每拾取一颗，回程伤害提高 12%（最多 8 层）。升级每颗再提高 5%；基础伤害降低 12%。
+    aiHint: 回旋镖收集沿路掉落物并以货物积累回程伤害；材料和经验即时入账，不会重复领取。
+    weaponId: boomerang
+    exclusiveGroup: boomerang_courier
+    kind: 9
+    rarity: 2
+    price: 44
+    maxLevel: 3
+    damageBonusPerLevel: 0
+    damageMultiplier: 0.88
+    attackIntervalMultiplier: 1.1
+    collectionRadius: 0.7
+    returnBonusPerPickup: 0.12
+    returnBonusPerPickupPerLevel: 0.05
+    maxPickupBonusCount: 8
+  - id: universal_big_round
+    displayName: 通用弹药：大号弹
+    description: 所有常规投射物枪械都可装备；弹体和真实命中范围增大，伤害略降。每把武器独立选择。
+    aiHint: 为任意常规枪械提供更宽的命中范围；购买一次解锁，本局逐把装备。
+    weaponId: '*'
+    exclusiveGroup: universal_big_round
+    kind: 4
+    rarity: 2
+    price: 40
+    maxLevel: 3
+    projectileSizePerLevel: 0.18
+    damageBonusPerLevel: 0
+    damageMultiplier: 0.88
+    attackIntervalMultiplier: 1.12
+    projectileSizeMultiplier: 1.3
+  - id: universal_charm_round
+    displayName: 通用弹药：糖衣弹
+    description: 所有非爆炸的常规子弹枪都可装备；命中普通怪有概率魅惑，降低直击伤害。
+    aiHint: 通用控制弹；购买一次解锁，本局可给每把兼容枪械分别装备。
+    weaponId: '*'
+    exclusiveGroup: universal_charm_round
+    kind: 5
+    rarity: 2
+    price: 46
+    maxLevel: 3
+    charmChancePerLevel: 0.06
+    charmDurationPerLevel: 0.35
+    damageBonusPerLevel: 0
+    damageMultiplier: 0.82
+    attackIntervalMultiplier: 1.12
+    charmChance: 0.12
+    charmDuration: 2
+  - id: rocket_vacuum
+    displayName: 吸尘火箭
+    description: 飞行中吸收附近敌方子弹，吸得越多爆炸越强；只在命中怪物或撞到场边时爆炸，飞行速度不变。
+    aiHint: 用火箭拦截弹幕换取爆炸伤害；需要有敌方弹幕的波次才充分发挥。
+    weaponId: rocket
+    exclusiveGroup: rocket_vacuum
+    kind: 7
+    rarity: 2
+    price: 57
+    maxLevel: 3
+    vacuumAbsorbLimit: 2
+    vacuumAbsorbPerLevel: 1
+    vacuumDamagePerAbsorb: 0.2
+    vacuumRadius: 0.75
+    damageBonusPerLevel: 0
+    damageMultiplier: 0.85
+    attackIntervalMultiplier: 1.15
+  - id: fist_spring_punch
+    displayName: 弹簧拳
+    description: 拳头命中普通怪后将其弹出；撞到另一只怪才造成追加伤害。拳击伤害降低，空挥不会触发。
+    aiHint: 用拳套制造怪群碰撞，换取群体控制；单体直接伤害下降。
+    weaponId: fist
+    exclusiveGroup: fist_spring_punch
+    kind: 8
+    rarity: 2
+    price: 38
+    maxLevel: 3
+    springKnockback: 2.8
+    springKnockbackPerLevel: 0.7
+    springCollisionDamageMultiplier: 0.55
+    springCollisionWindow: 0.35
+    damageBonusPerLevel: 0
+    damageMultiplier: 0.82
+    attackIntervalMultiplier: 1.1
+  directorChallengeModifiers:
+  - id: crowd
+    displayName: 怪潮
+    riskDescription: 本波敌人总量增加，场上可同时出现更多敌人。
+    minWave: 2
+    budgetMultiplier: 1.25
+    spawnIntervalMultiplier: 1
+    maxAliveBonus: 5
+    openingEliteCount: 0
+    rewardMaterials: 12
+  - id: rush
+    displayName: 急袭
+    riskDescription: 敌人更密集地入场，喘息时间缩短。
+    minWave: 2
+    budgetMultiplier: 1.1
+    spawnIntervalMultiplier: 0.78
+    maxAliveBonus: 3
+    openingEliteCount: 0
+    rewardMaterials: 12
+  - id: elite
+    displayName: 精英邀战
+    riskDescription: 开场额外出现精英敌人。
+    minWave: 3
+    budgetMultiplier: 1
+    spawnIntervalMultiplier: 1
+    maxAliveBonus: 1
+    openingEliteCount: 1
+    rewardMaterials: 16
+  enemies:
+  - id: chaser
+    displayName: "\u7EFF\u76AE\u5C0F\u602A"
+    behavior: 0
+    isBoss: 0
+    isElite: 0
+    maxHp: 8
+    moveSpeed: 1.6
+    contactDamage: 8
+    ranged: 0
+    rangedDamage: 0
+    rangedInterval: 0
+    projectileSpeed: 0
+    projectileCount: 1
+    explodeRadius: 0
+    splitCount: 0
+    splitEnemyId: 
+    materialDropMin: 1
+    materialDropMax: 2
+    expReward: 2
+    color: '#6FBF4A'
+    radius: 0.45
+    spawnWeight: 100
+  - id: ranger
+    displayName: "\u7D2B\u76AE\u5C04\u624B"
+    behavior: 1
+    isBoss: 0
+    isElite: 0
+    maxHp: 6
+    moveSpeed: 1.2
+    contactDamage: 4
+    ranged: 1
+    rangedDamage: 5
+    rangedInterval: 2.2
+    projectileSpeed: 5.5
+    projectileCount: 1
+    explodeRadius: 0
+    splitCount: 0
+    splitEnemyId: 
+    materialDropMin: 2
+    materialDropMax: 3
+    expReward: 3
+    color: '#A06FE0'
+    radius: 0.42
+    spawnWeight: 35
+  - id: exploder
+    displayName: "\u7EA2\u76AE\u81EA\u7206"
+    behavior: 2
+    isBoss: 0
+    isElite: 0
+    maxHp: 5
+    moveSpeed: 2.6
+    contactDamage: 14
+    ranged: 0
+    rangedDamage: 0
+    rangedInterval: 0
+    projectileSpeed: 0
+    projectileCount: 1
+    explodeRadius: 1.5
+    splitCount: 0
+    splitEnemyId: 
+    materialDropMin: 1
+    materialDropMax: 2
+    expReward: 3
+    color: '#E05555'
+    radius: 0.42
+    spawnWeight: 25
+  - id: tank
+    displayName: "\u94C1\u76AE\u5766\u514B"
+    behavior: 3
+    isBoss: 0
+    isElite: 0
+    maxHp: 30
+    moveSpeed: 0.8
+    contactDamage: 14
+    ranged: 0
+    rangedDamage: 0
+    rangedInterval: 0
+    projectileSpeed: 0
+    projectileCount: 1
+    explodeRadius: 0
+    splitCount: 0
+    splitEnemyId: 
+    materialDropMin: 3
+    materialDropMax: 5
+    expReward: 6
+    color: '#7A8A99'
+    radius: 0.6
+    spawnWeight: 15
+  - id: splitter
+    displayName: "\u5206\u88C2\u602A"
+    behavior: 4
+    isBoss: 0
+    isElite: 0
+    maxHp: 12
+    moveSpeed: 1.4
+    contactDamage: 6
+    ranged: 0
+    rangedDamage: 0
+    rangedInterval: 0
+    projectileSpeed: 0
+    projectileCount: 1
+    explodeRadius: 0
+    splitCount: 2
+    splitEnemyId: chaser
+    materialDropMin: 2
+    materialDropMax: 3
+    expReward: 3
+    color: '#55C4C4'
+    radius: 0.42
+    spawnWeight: 20
+  - id: elite_chaser
+    displayName: "\u7CBE\u82F1\u8FD1\u6218"
+    behavior: 0
+    isBoss: 0
+    isElite: 1
+    maxHp: 40
+    moveSpeed: 2
+    contactDamage: 16
+    ranged: 0
+    rangedDamage: 0
+    rangedInterval: 0
+    projectileSpeed: 0
+    projectileCount: 1
+    explodeRadius: 0
+    splitCount: 0
+    splitEnemyId: 
+    materialDropMin: 6
+    materialDropMax: 10
+    expReward: 12
+    color: '#D96FE0'
+    radius: 0.6
+    spawnWeight: 0
+  - id: boss1
+    displayName: "\u571F\u8C46\u5C60\u592B"
+    behavior: 5
+    isBoss: 1
+    isElite: 0
+    maxHp: 2200
+    moveSpeed: 1
+    contactDamage: 20
+    ranged: 1
+    rangedDamage: 6
+    rangedInterval: 1.5
+    projectileSpeed: 4.2
+    projectileCount: 8
+    bossWarningRadiusMultiplier: 1
+    bossAttackPattern: 0
+    bossImpactRadius: 1.8
+    bossAttackDamage: 24
+    explodeRadius: 0
+    splitCount: 0
+    splitEnemyId: 
+    materialDropMin: 40
+    materialDropMax: 60
+    expReward: 60
+    color: '#B04545'
+    radius: 0.45
+    spawnWeight: 0
+  - id: boss2
+    displayName: "\u571F\u8C46\u9B54\u738B"
+    behavior: 5
+    isBoss: 1
+    isElite: 0
+    maxHp: 3200
+    moveSpeed: 1.1
+    contactDamage: 26
+    ranged: 1
+    rangedDamage: 8
+    rangedInterval: 1.3
+    projectileSpeed: 4.5
+    projectileCount: 10
+    bossWarningRadiusMultiplier: 1
+    bossAttackPattern: 1
+    bossImpactRadius: 1.8
+    bossAttackDamage: 24
+    explodeRadius: 0
+    splitCount: 0
+    splitEnemyId: 
+    materialDropMin: 60
+    materialDropMax: 80
+    expReward: 90
+    color: '#4527A0'
+    radius: 0.48
+    spawnWeight: 0
+  items:
+  - id: heal_pack
+    displayName: "\u6025\u6551\u5305"
+    description: "\u7ACB\u5373\u56DE\u590D 30 HP\u3002\u6D88\u8017\u54C1\uFF0C\u4E0D\u5360\u80CC\u5305\u3002"
+    rarity: 0
+    basePrice: 10
+    maxStack: 1
+    isConsumable: 1
+    healAmount: 30
+    modifiers: []
+  - id: knockback_coil
+    displayName: "\u51FB\u9000\u7EBF\u5708"
+    description: "\u653B\u51FB\u9644\u5E26\u51FB\u9000 +2\u3002\u53EF\u53E0\u52A0\u3002"
+    rarity: 1
+    basePrice: 24
+    maxStack: 4
+    isConsumable: 0
+    healAmount: 0
+    modifiers:
+    - type: 13
+      flat: 2
+      percent: 0
+  - id: glass_cannon
+    displayName: "\u73BB\u7483\u5927\u70AE"
+    description: "\u4F24\u5BB3 +30%\uFF0C\u6700\u5927\u751F\u547D -20%\u3002\u9AD8\u98CE\u9669\u9AD8\u6536\u76CA\u3002"
+    rarity: 2
+    basePrice: 42
+    maxStack: 2
+    isConsumable: 0
+    healAmount: 0
+    modifiers:
+    - type: 4
+      flat: 0.3
+      percent: 0
+    - type: 0
+      flat: -20
+      percent: 0
+  - id: lucky_clover
+    displayName: "\u5E78\u8FD0\u8349"
+    description: "\u5E78\u8FD0 +2\uFF0C\u5546\u5E97\u66F4\u5BB9\u6613\u51FA\u9AD8\u7A00\u6709\u5EA6\u3002"
+    rarity: 0
+    basePrice: 12
+    maxStack: 5
+    isConsumable: 0
+    healAmount: 0
+    modifiers:
+    - type: 11
+      flat: 2
+      percent: 0
+  - id: iron_helmet
+    displayName: "\u94C1\u5934\u76D4"
+    description: "\u62A4\u7532 +4\uFF0C\u79FB\u901F -6%\u3002"
+    rarity: 1
+    basePrice: 18
+    maxStack: 3
+    isConsumable: 0
+    healAmount: 0
+    modifiers:
+    - type: 2
+      flat: 4
+      percent: 0
+    - type: 9
+      flat: -0.06
+      percent: 0
+  - id: stim
+    displayName: "\u5174\u594B\u5242"
+    description: "\u653B\u901F +25%\uFF0C\u751F\u547D\u5077\u53D6 -50%\uFF08\u6700\u4F4E\u4E3A
+      0\uFF09\u3002"
+    rarity: 2
+    basePrice: 38
+    maxStack: 3
+    isConsumable: 0
+    healAmount: 0
+    modifiers:
+    - type: 5
+      flat: 0.25
+      percent: 0
+    - type: 10
+      flat: -0.5
+      percent: 0
+  - id: thorn
+    displayName: "\u8346\u68D8\u7532"
+    description: "\u6700\u5927\u751F\u547D +25\uFF0C\u79FB\u901F -4%\u3002\u5766\u514B\u5316\u3002"
+    rarity: 1
+    basePrice: 22
+    maxStack: 3
+    isConsumable: 0
+    healAmount: 0
+    modifiers:
+    - type: 0
+      flat: 25
+      percent: 0
+    - type: 9
+      flat: -0.04
+      percent: 0
+  - id: boots
+    displayName: "\u75BE\u8DD1\u978B"
+    description: "\u79FB\u901F +15%\uFF0C\u6700\u5927\u751F\u547D -10\u3002"
+    rarity: 0
+    basePrice: 14
+    maxStack: 3
+    isConsumable: 0
+    healAmount: 0
+    modifiers:
+    - type: 9
+      flat: 0.15
+      percent: 0
+    - type: 0
+      flat: -10
+      percent: 0
+  - id: bandage
+    displayName: "\u7EF7\u5E26"
+    description: "\u6BCF\u79D2\u56DE\u590D 1 HP\u3002"
+    rarity: 0
+    basePrice: 10
+    maxStack: 5
+    isConsumable: 0
+    healAmount: 0
+    modifiers:
+    - type: 1
+      flat: 1
+      percent: 0
+  - id: medkit
+    displayName: "\u533B\u7597\u5305"
+    description: "\u6BCF\u79D2\u56DE\u590D 3 HP\uFF0C\u6700\u5927\u751F\u547D +10\uFF0C\u79FB\u901F
+      -3%\u3002"
+    rarity: 1
+    basePrice: 26
+    maxStack: 3
+    isConsumable: 0
+    healAmount: 0
+    modifiers:
+    - type: 1
+      flat: 3
+      percent: 0
+    - type: 0
+      flat: 10
+      percent: 0
+    - type: 9
+      flat: -0.03
+      percent: 0
+  - id: scope
+    displayName: "\u7784\u51C6\u955C"
+    description: "\u5C04\u7A0B +30%\uFF0C\u66B4\u51FB\u7387 +5%\uFF0C\u653B\u901F
+      -8%\u3002"
+    rarity: 2
+    basePrice: 44
+    maxStack: 3
+    isConsumable: 0
+    healAmount: 0
+    modifiers:
+    - type: 8
+      flat: 0.3
+      percent: 0
+    - type: 6
+      flat: 0.05
+      percent: 0
+    - type: 5
+      flat: -0.08
+      percent: 0
+  - id: crit_stone
+    displayName: "\u66B4\u51FB\u77F3"
+    description: "\u66B4\u51FB\u7387 +8%\uFF0C\u66B4\u51FB\u4F24\u5BB3 +30%\uFF0C\u6700\u5927\u751F\u547D
+      -10\u3002"
+    rarity: 1
+    basePrice: 24
+    maxStack: 4
+    isConsumable: 0
+    healAmount: 0
+    modifiers:
+    - type: 6
+      flat: 0.08
+      percent: 0
+    - type: 7
+      flat: 0.3
+      percent: 0
+    - type: 0
+      flat: -10
+      percent: 0
+  - id: vampiric
+    displayName: "\u5438\u8840\u9B3C\u7259"
+    description: "\u751F\u547D\u5077\u53D6 +8%\uFF0C\u6700\u5927\u751F\u547D -15\u3002"
+    rarity: 2
+    basePrice: 46
+    maxStack: 3
+    isConsumable: 0
+    healAmount: 0
+    modifiers:
+    - type: 10
+      flat: 0.08
+      percent: 0
+    - type: 0
+      flat: -15
+      percent: 0
+  - id: battery
+    displayName: "\u7535\u6C60"
+    description: "\u653B\u901F +15%\uFF0C\u4F24\u5BB3 -5%\u3002"
+    rarity: 1
+    basePrice: 20
+    maxStack: 4
+    isConsumable: 0
+    healAmount: 0
+    modifiers:
+    - type: 5
+      flat: 0.15
+      percent: 0
+    - type: 4
+      flat: -0.05
+      percent: 0
+  - id: armor_plate
+    displayName: "\u5408\u91D1\u677F"
+    description: "\u62A4\u7532 +6\uFF0C\u79FB\u901F -8%\u3002"
+    rarity: 2
+    basePrice: 40
+    maxStack: 3
+    isConsumable: 0
+    healAmount: 0
+    modifiers:
+    - type: 2
+      flat: 6
+      percent: 0
+    - type: 9
+      flat: -0.08
+      percent: 0
+  - id: lucky_ring
+    displayName: "\u5E78\u8FD0\u6212\u6307"
+    description: "\u5E78\u8FD0 +5\uFF0C\u66B4\u51FB\u7387 +5%\uFF0C\u4F24\u5BB3 -5%\u3002"
+    rarity: 3
+    basePrice: 70
+    maxStack: 2
+    isConsumable: 0
+    healAmount: 0
+    modifiers:
+    - type: 11
+      flat: 5
+      percent: 0
+    - type: 6
+      flat: 0.05
+      percent: 0
+    - type: 4
+      flat: -0.05
+      percent: 0
+  - id: blood_orb
+    displayName: "\u8840\u7403"
+    description: "\u6700\u5927\u751F\u547D +40\uFF0C\u6BCF\u79D2\u56DE\u590D -1\u3002"
+    rarity: 3
+    basePrice: 65
+    maxStack: 2
+    isConsumable: 0
+    healAmount: 0
+    modifiers:
+    - type: 0
+      flat: 40
+      percent: 0
+    - type: 1
+      flat: -1
+      percent: 0
+  - id: chaos_engine
+    displayName: "\u6DF7\u6C8C\u5F15\u64CE"
+    description: "\u4F24\u5BB3 +50%\uFF0C\u653B\u901F +20%\uFF0C\u6700\u5927\u751F\u547D
+      -30\uFF0C\u79FB\u901F -10%\u3002\u4EE3\u4EF7\u6C89\u91CD\u7684\u7EC8\u6781\u8F93\u51FA\u3002"
+    rarity: 4
+    basePrice: 130
+    maxStack: 1
+    isConsumable: 0
+    healAmount: 0
+    modifiers:
+    - type: 4
+      flat: 0.5
+      percent: 0
+    - type: 5
+      flat: 0.2
+      percent: 0
+    - type: 0
+      flat: -30
+      percent: 0
+    - type: 9
+      flat: -0.1
+      percent: 0
+  - id: red_core
+    displayName: "\u7329\u7EA2\u6838\u5FC3"
+    description: "\u4F24\u5BB3 +35%\uFF0C\u66B4\u51FB\u7387 +10%\uFF0C\u6700\u5927\u751F\u547D +20\u3002\u7EA2\u8272\u54C1\u8D28\u3002"
+    rarity: 5
+    basePrice: 180
+    maxStack: 1
+    modifiers:
+    - type: 4
+      flat: 0.35
+      percent: 0
+    - type: 6
+      flat: 0.1
+      percent: 0
+    - type: 0
+      flat: 20
+      percent: 0
+  - id: red_surge
+    displayName: "\u8D85\u8F7D\u82AF\u7247"
+    description: "\u653B\u901F +30%\uFF0C\u79FB\u901F +12%\uFF0C\u62A4\u7532 -4\u3002\u7EA2\u8272\u54C1\u8D28\u3002"
+    rarity: 5
+    basePrice: 165
+    maxStack: 1
+    modifiers:
+    - type: 5
+      flat: 0.3
+      percent: 0
+    - type: 9
+      flat: 0.12
+      percent: 0
+    - type: 2
+      flat: -4
+      percent: 0
+  - id: red_fortune
+    displayName: "\u547D\u8FD0\u9AB0\u5B50"
+    description: "\u5E78\u8FD0 +12\uFF0C\u62FE\u53D6\u8303\u56F4 +1\uFF0C\u6700\u5927\u751F\u547D -15\u3002\u7EA2\u8272\u54C1\u8D28\u3002"
+    rarity: 5
+    basePrice: 150
+    maxStack: 1
+    modifiers:
+    - type: 11
+      flat: 12
+      percent: 0
+    - type: 12
+      flat: 1
+      percent: 0
+    - type: 0
+      flat: -15
+      percent: 0
+  - id: precision_sight
+    displayName: "\u7CBE\u5BC6\u7784\u5177"
+    description: "\u66B4\u51FB\u7387 +6%\uFF0C\u653B\u51FB\u8303\u56F4 +15%\uFF0C\u653B\u901F -5%\u3002"
+    rarity: 2
+    basePrice: 48
+    maxStack: 3
+    modifiers:
+    - type: 6
+      flat: 0.06
+      percent: 0
+    - type: 8
+      flat: 0.15
+      percent: 0
+    - type: 5
+      flat: -0.05
+      percent: 0
+  - id: runner_soles
+    displayName: "\u8F7B\u7FBD\u978B"
+    description: "\u79FB\u52A8\u901F\u5EA6 +10%\uFF0C\u62FE\u53D6\u8303\u56F4 +0.4\u3002"
+    rarity: 1
+    basePrice: 26
+    maxStack: 3
+    modifiers:
+    - type: 9
+      flat: 0.1
+      percent: 0
+    - type: 12
+      flat: 0.4
+      percent: 0
+  - id: vitality_tonic
+    displayName: "\u6D3B\u529B\u836F\u5242"
+    description: "\u6700\u5927\u751F\u547D +30\uFF0C\u751F\u547D\u56DE\u590D +1.5\uFF0C\u5E78\u8FD0 -2\u3002"
+    rarity: 2
+    basePrice: 42
+    maxStack: 2
+    modifiers:
+    - type: 0
+      flat: 30
+      percent: 0
+    - type: 1
+      flat: 1.5
+      percent: 0
+    - type: 11
+      flat: -2
+      percent: 0

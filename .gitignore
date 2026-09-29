@@ -1,0 +1,30 @@
+# Unity-generated state; keep source assets, .meta files, packages and project settings.
+UnityProject/[Ll]ibrary/
+UnityProject/[Tt]emp/
+UnityProject/[Oo]bj/
+UnityProject/[Bb]uild/
+UnityProject/[Bb]uilds/
+UnityProject/[Ll]ogs/
+UnityProject/[Uu]ser[Ss]ettings/
+UnityProject/MemoryCaptures/
+UnityProject/Recordings/
+UnityProject/*.log
+
+# Local IDE and test outputs.
+.vs/
+.idea/
+.vscode/
+*.csproj
+*.sln
+*.suo
+*.user
+**/bin/
+**/obj/
+*.pyc
+__pycache__/
+
+# Local working artifacts and generated previews, not needed to open the game.
+/_cut_preview/
+/_gen_assets/
+/素材切割_v5/
+/storage/

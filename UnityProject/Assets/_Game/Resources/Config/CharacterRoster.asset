@@ -1,0 +1,66 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 83ab1c770cc94be7a62b6bc2493da9fe, type: 3}
+  m_Name: CharacterRoster
+  m_EditorClassIdentifier: 
+  characters:
+  - id: farmer
+    displayName: "\u571F\u8C46\u519C\u592B"
+    description: "\u67AA\u68B0\u4E13\u5BB6\uFF1A6 \u4E2A\u6B66\u5668\u69FD\uFF0C\u67AA\u68B0\u4F24\u5BB3\u63D0\u9AD8\uFF1B\u4ECD\u53EF\u4F7F\u7528\u8FD1\u6218\u3002"
+    color: '#E8C87A'
+    maxWeaponSlots: 6
+    startMaterials: 0
+    baseStats: []
+    startingWeapons:
+    - weaponId: pistol
+      level: 1
+    allowedWeaponKinds: 
+    projectileDamageMultiplier: 1.15
+  - id: chili
+    displayName: "\u8FA3\u6912\u5C0F\u5B50"
+    description: "\u8FD1\u6218\u4E13\u5BB6\uFF1A6 \u4E2A\u6B66\u5668\u69FD\uFF0C\u53EA\u80FD\u4F7F\u7528\u8FD1\u6218\u6B66\u5668\u3002"
+    color: '#E05555'
+    maxWeaponSlots: 6
+    startMaterials: 0
+    baseStats:
+    - type: 0
+      flat: -25
+      percent: 0
+    - type: 5
+      flat: 0.15
+      percent: 0
+    - type: 9
+      flat: 0.1
+      percent: 0
+    startingWeapons:
+    - weaponId: fist
+      level: 1
+    allowedWeaponKinds: 01000000
+    projectileDamageMultiplier: 1
+  - id: mushroom
+    displayName: "\u8611\u83C7\u6CD5\u5E08"
+    description: "\u5F3A\u5316\u5355\u6B66\u5668\u89D2\u8272\uFF1A\u4EC5 1 \u4E2A\u6B66\u5668\u69FD\uFF0C\u52A0\u7279\u6797\u8D77\u624B\uFF0C\u751F\u547D\u4E0E\u4F24\u5BB3\u66F4\u9AD8\u3002"
+    color: '#B07AE0'
+    maxWeaponSlots: 1
+    startMaterials: 0
+    baseStats:
+    - type: 0
+      flat: 25
+      percent: 0
+    - type: 4
+      flat: 0
+      percent: 0.15
+    startingWeapons:
+    - weaponId: minigun
+      level: 1
+    allowedWeaponKinds: 
+    projectileDamageMultiplier: 1

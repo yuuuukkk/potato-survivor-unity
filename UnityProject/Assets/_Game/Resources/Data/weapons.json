@@ -1,0 +1,102 @@
+{
+  "weapons": [
+    {
+      "id": "pistol", "displayName": "土豆手枪", "kind": 0, "rarity": 0, "basePrice": 15,
+      "damage": 10, "attackInterval": 0.9, "projectileCount": 1, "spreadDeg": 0,
+      "projectileSpeed": 9, "range": 6.5, "pierce": 0, "critChance": 0, "critDamageMult": 2,
+      "explodeRadius": 0, "bulletColor": "#FFE066", "bulletRadius": 0.12,
+      "description": "标准单发手枪，可靠的基础输出。"
+    },
+    {
+      "id": "smg", "displayName": "冲锋枪", "kind": 0, "rarity": 1, "basePrice": 28,
+      "damage": 4, "attackInterval": 0.06, "projectileCount": 1, "spreadDeg": 0,
+      "projectileSpeed": 10, "range": 5.2, "pierce": 0, "critChance": 0, "critDamageMult": 2,
+      "explodeRadius": 0, "bulletColor": "#7EC8E3", "bulletRadius": 0.1,
+      "description": "高射速单发子弹，持续压制敌人。"
+    },
+    {
+      "id": "shotgun", "displayName": "霰弹枪", "kind": 0, "rarity": 2, "basePrice": 55,
+      "damage": 6, "attackInterval": 1.1, "projectileCount": 5, "spreadDeg": 32,
+      "projectileSpeed": 9, "range": 4.0, "pierce": 0, "critChance": 0, "critDamageMult": 2,
+      "explodeRadius": 0, "bulletColor": "#E3B778", "bulletRadius": 0.11,
+      "description": "五连发扇形弹幕，贴脸输出爆炸。"
+    },
+    {
+      "id": "sniper", "displayName": "土豆狙击枪", "kind": 0, "rarity": 2, "basePrice": 60,
+      "damage": 48, "attackInterval": 1.6, "projectileCount": 1, "spreadDeg": 0,
+      "projectileSpeed": 14, "range": 9.0, "pierce": 3, "critChance": 0.15, "critDamageMult": 2.5,
+      "explodeRadius": 0, "bulletColor": "#9FE0A8", "bulletRadius": 0.13, "projectileVisualSize": 0.72,
+      "description": "高伤高穿透，一条线上的敌人都会遭殃。"
+    },
+    {
+      "id": "laser", "displayName": "激光枪", "kind": 0, "attackPattern": 2, "laserBeamWidth": 0.24, "patternEffectDuration": 0.12, "rarity": 3, "basePrice": 95,
+      "damage": 12, "attackInterval": 0.45, "projectileCount": 1, "spreadDeg": 0,
+      "projectileSpeed": 12, "range": 7.0, "pierce": 99, "critChance": 0.05, "critDamageMult": 2,
+      "explodeRadius": 0, "bulletColor": "#FF7A7A", "bulletRadius": 0.08,
+      "description": "无限穿透的持续光束。"
+    },
+    {
+      "id": "rocket", "displayName": "火箭筒", "kind": 0, "rarity": 3, "basePrice": 100,
+      "damage": 26, "attackInterval": 1.8, "projectileCount": 1, "spreadDeg": 0,
+      "projectileSpeed": 6, "range": 7.5, "pierce": 0, "critChance": 0, "critDamageMult": 2,
+      "explodeRadius": 2.2, "bulletColor": "#FF9F43", "bulletRadius": 0.32,
+      "projectileVisualSize": 0.7,
+      "description": "命中爆炸，大范围清场。"
+    },
+    {
+      "id": "sword", "displayName": "土豆大剑", "kind": 1, "rarity": 0, "basePrice": 16,
+      "damage": 22, "attackInterval": 0.8, "projectileCount": 1, "spreadDeg": 0,
+      "projectileSpeed": 0, "range": 2.2, "pierce": 0, "critChance": 0, "critDamageMult": 2,
+      "explodeRadius": 0, "bulletColor": "#C8C8C8", "bulletRadius": 0.14,
+      "description": "面前 120° 扇形挥砍，高伤害高风险。", "meleeAnimation": 0,
+      "meleeAnimationDuration": 0.30, "meleeSwingDegrees": 120, "meleeThrustDistance": 0.8,
+      "meleeSwingOutwardDistance": 0.8, "meleeHitWidth": 0.28,
+      "meleeHandleFraction": 0.18, "meleeContactFraction": 0.5,
+      "meleeActiveStart": 0.22, "meleeActiveEnd": 0.84,
+      "meleeHitArcDegrees": 120
+    },
+    {
+      "id": "fist", "displayName": "拳套", "kind": 1, "rarity": 1, "basePrice": 30,
+      "damage": 8, "attackInterval": 0.25, "projectileCount": 1, "spreadDeg": 0,
+      "projectileSpeed": 0, "range": 1.4, "pierce": 0, "critChance": 0, "critDamageMult": 2,
+      "explodeRadius": 0, "bulletColor": "#FF8A8A", "bulletRadius": 0.12,
+      "description": "极速近战连击，贴身输出之王。", "meleeAnimation": 1,
+      "meleeAnimationDuration": 0.16, "meleeSwingDegrees": 20, "meleeThrustDistance": 0.7,
+      "meleeSwingOutwardDistance": 0.42, "meleeHitWidth": 0.38,
+      "meleeHandleFraction": 0.18, "meleeContactFraction": 0.5,
+      "meleeActiveStart": 0.22, "meleeActiveEnd": 0.80,
+      "meleeHitArcDegrees": 90
+    },
+    {
+      "id": "boomerang", "displayName": "回旋镖", "kind": 4, "rarity": 1, "basePrice": 35,
+      "damage": 9, "attackInterval": 1.0, "projectileCount": 1, "spreadDeg": 0,
+      "projectileSpeed": 7, "range": 3.6, "pierce": 0, "critChance": 0, "critDamageMult": 2,
+      "explodeRadius": 0, "bulletColor": "#7EE39B", "bulletRadius": 0.30,
+      "projectileVisualSize": 0.68,
+      "description": "投掷后飞回玩家身边，去程与回程都可命中。"
+    },
+    {
+      "id": "drone", "displayName": "无人机", "kind": 3, "rarity": 2, "basePrice": 58,
+      "damage": 7, "attackInterval": 0.5, "projectileCount": 1, "spreadDeg": 0,
+      "projectileSpeed": 10, "range": 5.0, "pierce": 0, "critChance": 0, "critDamageMult": 2,
+      "explodeRadius": 0, "bulletColor": "#A89FE0", "bulletRadius": 0.12,
+      "projectileVisualSize": 0.38, "droneOrbitRadius": 1.05, "droneOrbitSpeed": 120,
+      "droneVisualSize": 0.9,
+      "description": "悬浮在玩家周围，自动瞄准并射击。"
+    },
+    {
+      "id": "minigun", "displayName": "加特林", "kind": 0, "rarity": 3, "basePrice": 105,
+      "damage": 3, "attackInterval": 0.18, "projectileCount": 3, "spreadDeg": 14,
+      "projectileSpeed": 11, "range": 6.0, "pierce": 1, "critChance": 0.03, "critDamageMult": 2,
+      "explodeRadius": 0, "bulletColor": "#E3E37E", "bulletRadius": 0.08,
+      "description": "三发散射弹幕，每发都可穿透。"
+    },
+    {
+      "id": "flamethrower", "displayName": "火焰喷射器", "kind": 0, "attackPattern": 1, "flameConeAngle": 52, "patternEffectDuration": 0.18, "rarity": 2, "basePrice": 62,
+      "damage": 5, "attackInterval": 0.08, "projectileCount": 1, "spreadDeg": 22,
+      "projectileSpeed": 7, "range": 3.4, "pierce": 2, "critChance": 0, "critDamageMult": 2,
+      "explodeRadius": 0, "bulletColor": "#FF6B35", "bulletRadius": 0.12,
+      "description": "朝前喷出短距离扇形火焰，可同时烧到扇面前方的敌人。"
+    }
+  ]
+}

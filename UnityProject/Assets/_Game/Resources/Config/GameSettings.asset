@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5fa75aca7384fd38e4b0b1a50d39712, type: 3}
+  m_Name: GameSettings
+  m_EditorClassIdentifier: 
+  arenaSize: {x: 24, y: 13.5}
+  cameraSize: 5.2
+  cameraFollowSmooth: 8
+  cameraBackgroundColor: {r: 0.055, g: 0.05, b: 0.08, a: 1}
+  mobileJoystickSize: 184
+  mobileJoystickSafeMargin: 26
+  mobileJoystickDeadZone: 0.16
+  mobileJoystickTrackColor: {r: 0.12, g: 0.1, b: 0.16, a: 0.64}
+  mobileJoystickKnobColor: {r: 0.86, g: 0.79, b: 0.65, a: 0.86}
+  defaultCharacterId: farmer
+  startWave: 1
+  skipMenu: 0
+  xpConfig: {fileID: 11400000, guid: 3ab70d21218d01f43bbb12e8ace7e058, type: 2}
+  weaponForgeEndpoint: 
+  weaponForgeTimeoutSeconds: 25
+  weaponForgeApiKey: 
+  weaponForgeModel: deepseek-flash

@@ -1,0 +1,89 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7cf48d3a91ef4cd9a91d28f7384387cd, type: 3}
+  m_Name: GameArtLibrary
+  m_EditorClassIdentifier: 
+  mapBackground: {fileID: 21300000, guid: f5883642d0d14ecf91cf9b3af6fa5166, type: 3}
+  characters:
+  - id: farmer
+    sprite: {fileID: 21300000, guid: 38d94dd6c80d6b44592251da1fd67b0f, type: 3}
+  - id: chili
+    sprite: {fileID: 21300000, guid: 9236ac0b436287b4889ce45b62261484, type: 3}
+  - id: mushroom
+    sprite: {fileID: 21300000, guid: 5be4cdaa7fc3d9045ba1cad003f4c175, type: 3}
+  enemies:
+  - id: chaser
+    sprite: {fileID: 21300000, guid: f387c855e8e5c0e438e0b31ca02ff67a, type: 3}
+  - id: ranger
+    sprite: {fileID: 21300000, guid: a87df0191f495764493ffcf13226bd7e, type: 3}
+  - id: exploder
+    sprite: {fileID: 21300000, guid: df22e513053c81046b409a9ac8e3ac01, type: 3}
+  - id: tank
+    sprite: {fileID: 21300000, guid: 5cd219e2374007e4096dd5fd98c58e7a, type: 3}
+  - id: splitter
+    sprite: {fileID: 21300000, guid: 83c21d0ab4de4854a873e7b2d9c64bf5, type: 3}
+  - id: elite_chaser
+    sprite: {fileID: 21300000, guid: b869908d5dfaf1d4ea65d6a4c999fca6, type: 3}
+  - id: boss1
+    sprite: {fileID: 21300000, guid: 5af56f9c1450c54419ae10f6e86797af, type: 3}
+  - id: boss2
+    sprite: {fileID: 21300000, guid: 803f6d235878e92448e88d82e8995d78, type: 3}
+  weapons:
+  - id: pistol
+    sprite: {fileID: 21300000, guid: fd0d91319243603459a641dcc626a72f, type: 3}
+  - id: smg
+    sprite: {fileID: 21300000, guid: 039c0cbe40cd3a1489501e9bbf7fb1c6, type: 3}
+  - id: shotgun
+    sprite: {fileID: 21300000, guid: 553d364f8dfcbcb448f5de285f452605, type: 3}
+  - id: sniper
+    sprite: {fileID: 21300000, guid: 6bbb6dd49aaf14640a667558f6f3d4b6, type: 3}
+  - id: laser
+    sprite: {fileID: 21300000, guid: b07ea96dc0016e34398f2599049088f2, type: 3}
+  - id: rocket
+    sprite: {fileID: 21300000, guid: da89e471629bb034b93d229317f3b527, type: 3}
+  - id: sword
+    sprite: {fileID: 21300000, guid: 0908e624f8964f309ddaae654cb5a10b, type: 3}
+  - id: fist
+    sprite: {fileID: 21300000, guid: f9ff348c16c0438fb081e4bd8579fd24, type: 3}
+  - id: boomerang
+    sprite: {fileID: 21300000, guid: 552cd802c31b4bb89062bdce0192510d, type: 3}
+  - id: drone
+    sprite: {fileID: 21300000, guid: c5f8f63faa4a419cae1c0c7367cc7879, type: 3}
+  - id: minigun
+    sprite: {fileID: 21300000, guid: cbe38443bbf344768fd67431a827062c, type: 3}
+  - id: flamethrower
+    sprite: {fileID: 21300000, guid: a08a847e52a24d8f8984cc19e63bbd17, type: 3}
+  projectiles:
+  - id: pistol
+    sprite: {fileID: 21300000, guid: 18a2eade7cc94f8bbcbc25a788600899, type: 3}
+  - id: smg
+    sprite: {fileID: 21300000, guid: 77d6490f838a4a308e4e28ef2dc832b4, type: 3}
+  - id: shotgun
+    sprite: {fileID: 21300000, guid: 4675a24b4a954e82b16008b747c7cecc, type: 3}
+  - id: sniper
+    sprite: {fileID: 21300000, guid: 3b0188430e6c407c8dbac50bc142b7f1, type: 3}
+  - id: laser
+    sprite: {fileID: 21300000, guid: e204ecdad9e04a789dd2a2ca100d2168, type: 3}
+  - id: rocket
+    sprite: {fileID: 21300000, guid: 5de0a595e5914cffb4c38aae1aea2eb5, type: 3}
+  - id: sword
+    sprite: {fileID: 21300000, guid: f391c89f8ade4483b63facb3b340496b, type: 3}
+  - id: fist
+    sprite: {fileID: 21300000, guid: 9f676eaf25224a21a3a7a16c64c69923, type: 3}
+  - id: boomerang
+    sprite: {fileID: 21300000, guid: b7926b33fc0149c186aff3cf6744350a, type: 3}
+  - id: drone
+    sprite: {fileID: 21300000, guid: c1b508d48cc7419088c41deecc825220, type: 3}
+  - id: minigun
+    sprite: {fileID: 21300000, guid: d2e3adaba1184a14b5202f641237be6a, type: 3}
+  - id: flamethrower
+    sprite: {fileID: 21300000, guid: bddf16b2fa8f403985f02f0c5749d8cd, type: 3}

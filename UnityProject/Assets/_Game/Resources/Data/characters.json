@@ -1,0 +1,33 @@
+{
+  "characters": [
+    {
+      "id": "farmer", "displayName": "土豆农夫",
+      "description": "平衡的初始角色，适合熟悉游戏节奏。",
+      "color": "#E8C87A", "maxWeaponSlots": 6, "startMaterials": 0,
+      "baseStats": [],
+      "startingWeapons": [ { "weaponId": "pistol", "level": 1 } ]
+    },
+    {
+      "id": "chili", "displayName": "辣椒小子",
+      "description": "双冲锋枪起手，攻速移速加成但血量低，高风险近身输出。",
+      "color": "#E05555", "maxWeaponSlots": 6, "startMaterials": 0,
+      "baseStats": [
+        { "type": 0, "flat": -25, "percent": 0 },
+        { "type": 5, "flat": 0.15, "percent": 0 },
+        { "type": 9, "flat": 0.10, "percent": 0 }
+      ],
+      "startingWeapons": [ { "weaponId": "smg", "level": 1 }, { "weaponId": "smg", "level": 1 } ]
+    },
+    {
+      "id": "mushroom", "displayName": "蘑菇法师",
+      "description": "回旋镖起手，伤害高但攻速慢，环绕流起点。",
+      "color": "#B07AE0", "maxWeaponSlots": 6, "startMaterials": 0,
+      "baseStats": [
+        { "type": 0, "flat": -15, "percent": 0 },
+        { "type": 4, "flat": 0.20, "percent": 0 },
+        { "type": 5, "flat": -0.10, "percent": 0 }
+      ],
+      "startingWeapons": [ { "weaponId": "boomerang", "level": 1 } ]
+    }
+  ]
+}
