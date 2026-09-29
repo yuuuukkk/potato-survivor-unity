@@ -1,63 +1,62 @@
-# 《土豆幸存者》—— Unity 肉鸽生存游戏
+# 土豆幸存者
 
-一款参照《土豆兄弟 Brotato》的 2D 俯视角 Roguelite 生存游戏。自动攻击、手动走位、波间商店构筑，20 波生存挑战。
+一款开发中的 Unity 2D 俯视角生存游戏：玩家负责走位，武器自动寻找目标；在波次之间购买武器、道具和改造，逐步构筑自己的打法。项目以《土豆兄弟》等幸存者游戏为玩法参考，是非官方练习作品，与原作没有关联。
 
-## 快速开始（3 步）
+当前仓库是**游戏工程源码，不是安装包**。默认 20 波，包含角色选择、升级、三商品位商店、武器出售与合成、独立武器构筑、Boss 和可选挑战。数值与手感仍在调整；README 中的“已实现”表示代码和资源已接入，不表示每一种组合都完成了实际 Play 验收。
 
-1. 用 Unity Hub 打开 `UnityProject` 目录（推荐 **Unity 2022.3 LTS**，2021.3+ 亦可，首次打开请让它升级/解析包）。
-2. 打开任意场景（新建空场景即可），直接按 **Play** —— 游戏由 `GameBootstrap` 运行时自动搭建，无需任何手工配置或美术资源。
-3. WASD/方向键移动，武器自动索敌开火；击杀敌人攒经验升级（三选一强化）；波间在商店购买武器与道具，撑过 20 波。
+## 打开与游玩
 
-> 首次打开若报 `ProjectVersion.txt` 版本不匹配，直接用你本机 Unity 版本打开即可（提示升级/降级，点确认）。若 `Packages/manifest.json` 缺包，Unity 会自动解析补齐。
+1. 安装 Unity **2022.3.20f1c1**（项目记录的版本；同系列 2022.3 LTS 可能需要重新导入）。
+2. 在 Unity Hub 中选择本仓库的 `UnityProject` 文件夹。首次导入请等待 Unity 解析资源和脚本。
+3. 打开 `UnityProject/Assets/_Game/scene/rouge.unity`，点击 **Play**。该场景已列入 Build Settings；不需要手动新建场景或逐个挂载素材。
+4. 在主菜单选角色并开始游戏。键盘用 **WASD / 方向键**移动，武器自动攻击；**Esc** 打开或关闭设置，**F1** 显示测试用 GM 面板。手机运行时显示触控摇杆。
 
-## 文档导航
+要制作可分发版本，请在 Unity 的 **File → Build Settings** 中选择 Windows 或 Android 后构建。Windows 构建需要把 `.exe` 和同名 `_Data` 文件夹一起交给朋友；Android 构建需要安装与该 Unity 编辑器版本对应的 Android Build Support 模块。仓库未附带预构建的 EXE/APK。
+
+## 当前玩法
+
+- 三名角色：土豆农夫、辣椒小子、蘑菇法师。角色有各自的初始武器、可用武器类别和武器槽限制。
+- 武器涵盖枪械、近战、回旋镖与无人机等；怪物死亡掉落经验与材料，升级时选择强化，波次之间进入商店。
+- 商店一次显示 **3 个商品位**，可刷新、锁定商品、购买道具或武器，并出售持有武器。同等级武器的合成与各角色武器槽限制由游戏逻辑处理。
+- 构筑先在商店购买解锁或升级，再到独立的**“武器构筑”**界面逐把装备。两把同型号武器可以选择不同构筑；每把武器当前最多装备两个相容改造。已有反弹、穿透、魅惑、子弹放大、剑气、吸尘火箭、弹簧拳和回旋镖拾取等分支，效果与代价可在配置中调整。
+- 波间挑战是可选内容；未配置在线 AI 时仍可使用本地挑战。游戏本体不依赖网络。
+- Windows 设置界面提供分辨率和全屏选项；手机端有触控移动与安全区适配。GM 面板用于开发测试，不是正式游戏功能。
+
+## 配置与素材在哪里
+
+主要可编辑配置都在 `UnityProject/Assets/_Game/Resources/Config/`：
 
 | 文件 | 内容 |
-|---|---|
-| `docs/01-游戏设计文档.md` | 完整 GDD：定位、走读、循环、机制、数值、内容、P0 范围 |
-| `docs/02-Unity架构设计.md` | 架构：模块划分、类职责、状态机、数据流、设计决策 |
-| `docs/03-实现清单与扩展路线.md` | 已实现内容、运行方式、配置字段说明、P1/P2 路线图 |
-| `可视化/架构总览.html` | 浏览器打开的架构与循环可视化（ECharts） |
+| --- | --- |
+| `GameContent.asset` | 武器、武器改造、敌人、道具和挑战目录 |
+| `CharacterRoster.asset` | 角色、初始武器与角色限制 |
+| `GameBalance.asset` | 波次、商店、战斗反馈及全局数值 |
+| `GameSettings.asset` | 场景、开局、手机触控及可选 AI 连接 |
+| `UITheme.asset` | 界面主题 |
 
-## 目录结构
+角色、敌人、武器、弹体、道具、特效和地图图片位于 `UnityProject/Assets/_Game/Resources/Art/`。场景和预制体位于 `UnityProject/Assets/_Game/scene/`、`UnityProject/Assets/_Game/Resources/Prefabs/`。替换素材时应保留 Unity 的 `.meta` 文件，并检查相应的 Sprite 导入、碰撞和预制体引用。旧 `Resources/Data/*.json` 是兼容回退路径；当前优先加载上述 SO 配置。
 
-```
-rougelike/
-├─ README.md
-├─ docs/                     # 设计文档
-├─ 可视化/                    # 架构可视化 HTML
-└─ UnityProject/
-   ├─ Packages/manifest.json
-   ├─ ProjectSettings/
-   └─ Assets/_Game/
-      ├─ Scripts/            # 全部 C# 源码（Core/Data/Player/Combat/Enemies/Items/UI）
-      └─ Resources/Data/     # JSON 内容配置（武器/敌人/道具/角色/波次）
-```
+## 可选 AI 功能与密钥
 
-## 当前版本
+AI 只会在游戏预设的挑战/改造候选中做推荐或选择，不会生成可执行代码，也不会自动改写武器数值。仓库中的 `GameSettings.asset` **不包含 API Key**；未配置时可照常游玩及使用本地挑战。相关实现与本机代理说明见 [`docs/AI接入DeepSeek本机测试.md`](docs/AI接入DeepSeek本机测试.md)，但该文档记录了早期测试过程，具体按钮和候选数量请以当前游戏为准。
 
-- v0.1 可玩原型：完整 20 波循环、8 种敌人、12 种武器、17 件道具（含急救包消耗品）、3 个角色、6 卡可刷新商店、经验升级三选一、底部物品栏 + 悬停描述、属性面板（I 键）、**玩家武器挂件（土豆兄弟式，不同武器位置不同）**、三大对象池（WeaponPool/EnemyPool/ItemPool）、数据驱动。
-- 所有美术默认是运行时生成的占位色块；素材有统一预留位置（见下），无任何第三方依赖，开箱即玩。
+不要把真实密钥提交到 Git。把密钥直接填进 Unity 资源或安装包后，其他人可以从文件中提取；给朋友提供在线 AI 时应由你控制的后端保管密钥，并设置访问控制与调用限额。
 
-## 美术与可视化编辑
+## 版本沿革
 
-仓库现已包含一套可直接运行的原创扁平粗线条美术：3 名英雄、8 个敌人、12 把武器、12 个弹体和竞技场地图。打开场景点击 Play 即会自动读取。
+> **记录方式**：建仓前没有 Git 历史。下面是依据现有工程与开发对话整理的功能阶段，不是可逐个检出的旧版本，也不标注无法核实的发布日期。**2026-09-29 的提交 `7aad9f4` 是第一份可在 Git 中核验的完整基线**；从此以后以提交记录为准。
 
-程序按固定路径读取 `Assets/_Game/Resources/Art`：角色 `Characters/character_<id>.png`、敌人 `Enemies/enemy_<id>.png`、武器 `Weapons/weapon_<id>.png`、弹体 `Projectiles/projectile_<id>.png`、地图 `Map/map_arena.png`。同名替换图片即可换皮，不需要改代码。
+| 阶段 | 主要变化 |
+| --- | --- |
+| 原型阶段 | 建立 20 波生存循环、角色选择、自动攻击、经验升级、波间商店、基础敌人/武器/道具与对象池。 |
+| 素材与配置阶段 | 接入可替换的角色、敌人、武器和场景素材；将主要内容与数值转为 SO 配置，减少必须修改 C# 的项目。 |
+| 战斗与商店阶段 | 调整枪口发射和近战实际命中、Boss 攻击表现、掉落物、武器合成/出售、三商品位刷新/锁定，以及命中和受击反馈。 |
+| 界面与平台阶段 | 整理角色选择、商店、属性、设置和 GM 测试界面；加入分辨率设置、Windows 构建入口与手机触控适配。 |
+| 构筑与可选 AI 阶段 | 加入逐把武器的独立构筑页、通用弹药及专属改造、可升级构筑与可选挑战；AI 接口限定在预设候选内。 |
+| Git 基线 · 2026-09-29 | 首次将当前工程提交并上传到 GitHub；移除提交内容中的测试用 DeepSeek Key。提交：`7aad9f4`。 |
 
-1. Unity 菜单打开 **「土豆幸存者 / 打开可视化编辑中心」**。
-2. 角色、敌人、武器、弹体和地图图片直接拖到 `GameArtLibrary` 对应槽位。
-3. 需要调整尺寸、碰撞和层级时，打开对应 Prefab；UI 位置、颜色和文字直接编辑 `UICanvas.prefab`。
-4. 若希望所有内容直接出现在 Hierarchy，打开主场景后执行 **「土豆幸存者 / 搭建场景结构」**。运行时会复用场景对象，不再销毁你的 Canvas 或重建布局。
+后续更新请在提交中说明改动，并在本节顶部追加“日期 / 提交号 / 主要变化 / 验证状态”。这样才能真正追踪版本差异，而不是事后猜测。
 
-| 对象 | 预制路径 | 换皮位置 |
-|---|---|---|
-| 玩家子弹（12 种武器各自一个） | `Prefabs/WeaponPool/bullet_{id}.prefab` | SpriteRenderer.Sprite |
-| 敌人（8 种各自一个） | `Prefabs/EnemyPool/enemy_{id}.prefab` | SpriteRenderer.Sprite |
-| 掉落物（材料） | `Prefabs/Items/item_material.prefab` | SpriteRenderer.Sprite |
-| 敌方子弹 / Boss 预警 / 环绕体 / 炮台 | `Prefabs/Shared/enemy_bullet|boss_warning|orbit|turret.prefab` | SpriteRenderer.Sprite |
-| 玩家 | `Prefabs/Shared/player.prefab` | SpriteRenderer.Sprite（含全部脚本组件） |
-| 武器挂件（玩家身上） | `Prefabs/Shared/weapon_visual.prefab` | SpriteRenderer.Sprite（近战=方块贴手、远程=圆点挂肩腰、回旋镖=背） |
-| 竞技场背景 / 边界 | `Prefabs/Shared/arena_bg|arena_border.prefab` | SpriteRenderer.Sprite |
+## 其他文档
 
-> 数值调整统一在 `Assets/_Game/Resources/Data/waveconfig.json` 一个文件里（价格、商店槽位、升级成长、稀有度倍率/开放波次、治疗量等）；武器/敌人/道具/角色内容在对应 JSON。
+`docs/` 保存设计、架构和早期验证记录，其中部分描述早于当前实现，阅读时请优先以 SO 配置与代码为准。`验证脚本/` 存放辅助检查脚本；它们不能替代 Unity 中的实际 Play 测试。
