@@ -20,10 +20,17 @@ namespace RogueLike.Core
             if (gm == null || gm.Player == null) return;
             Vector3 target = gm.Player.transform.position + offset;
             _followPosition = Vector3.Lerp(_followPosition, target, Mathf.Clamp01(smooth * Time.deltaTime));
-            // 叠加屏幕震动偏移（CameraShake 只输出偏移、不再直接改相机位置）
-            Vector3 position = _followPosition + (CameraShake.Instance != null
-                ? CameraShake.Instance.CurrentOffset : Vector3.zero);
-            transform.position = ClampToArena(position);
+            // 先钳制正常跟随位置；靠近场地边界时，将朝场外的震屏偏移反射回场内。
+            // 否则最终钳制会把震屏完全吃掉，受击只在场地中央才看得出来。
+            Vector3 basePosition = ClampToArena(_followPosition);
+            Vector3 shake = CameraShake.Instance != null
+                ? CameraShake.Instance.CurrentOffset : Vector3.zero;
+            Vector3 position = ClampToArena(basePosition + shake);
+            if (Mathf.Abs(position.x - basePosition.x) < 0.0001f && Mathf.Abs(shake.x) > 0.0001f)
+                position.x = ClampToArena(basePosition - new Vector3(shake.x, 0f, 0f)).x;
+            if (Mathf.Abs(position.y - basePosition.y) < 0.0001f && Mathf.Abs(shake.y) > 0.0001f)
+                position.y = ClampToArena(basePosition - new Vector3(0f, shake.y, 0f)).y;
+            transform.position = position;
         }
 
         private Vector3 ClampToArena(Vector3 position)

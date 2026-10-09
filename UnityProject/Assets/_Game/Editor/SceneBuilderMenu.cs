@@ -6,6 +6,7 @@ using RogueLike.Items;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
 namespace RogueLike.EditorTools
@@ -30,6 +31,15 @@ namespace RogueLike.EditorTools
             }
 
             int created = 0;
+
+            // Keep the bootstrap visible and editable as part of the authored scene.
+            if (Object.FindObjectOfType<GameBootstrap>() == null)
+            {
+                var bootstrap = new GameObject("GameBootstrap");
+                bootstrap.AddComponent<GameBootstrap>();
+                Undo.RegisterCreatedObjectUndo(bootstrap, "搭建场景结构");
+                created++;
+            }
 
             // 1. GameManager + GameConfig（集中配置面板）
             var existingManager = Object.FindObjectOfType<GameManager>();
@@ -85,6 +95,7 @@ namespace RogueLike.EditorTools
                 created++;
                 Debug.Log("[SceneBuilder] 已创建 Player 占位（正式素材用 Shared/player 预制替换）。");
             }
+            if (EnsurePlayerArt(GameObject.Find("Player"))) created++;
 
             // 4. UI 直接放进场景，之后可在 Hierarchy 中所见即所得地修改。
             if (GameObject.Find("UICanvas") == null)
@@ -99,14 +110,35 @@ namespace RogueLike.EditorTools
                 }
             }
 
+            if (GameObject.Find("DamageCanvas") == null)
+            {
+                var damageCanvas = new GameObject("DamageCanvas", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
+                var canvas = damageCanvas.GetComponent<Canvas>();
+                canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+                canvas.sortingOrder = 50;
+                var scaler = damageCanvas.GetComponent<CanvasScaler>();
+                scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+                scaler.referenceResolution = new Vector2(1280f, 720f);
+                scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.Expand;
+                Undo.RegisterCreatedObjectUndo(damageCanvas, "搭建伤害数字画布");
+                created++;
+            }
+
             // 5. Arena 根对象放进场景。背景和边界均为 Prefab 实例，可直接拖 Sprite、调尺寸和位置。
             if (GameObject.Find("Arena") == null)
             {
                 var arena = new GameObject("Arena");
                 Undo.RegisterCreatedObjectUndo(arena, "搭建可编辑竞技场");
-                CreatePrefabChild("Assets/_Game/Resources/Prefabs/Shared/arena_bg.prefab", arena.transform, "Background");
                 var config = Resources.Load<GameSettingsSO>("Config/GameSettings");
                 Vector2 size = config != null ? config.arenaSize : new Vector2(24f, 13.5f);
+                var background = CreatePrefabChild("Assets/_Game/Resources/Prefabs/Shared/arena_bg.prefab", arena.transform, "Background");
+                var backgroundRenderer = background != null ? background.GetComponent<SpriteRenderer>() : null;
+                if (backgroundRenderer != null && backgroundRenderer.sprite != null)
+                {
+                    float scale = size.x / Mathf.Max(0.001f, backgroundRenderer.sprite.bounds.size.x);
+                    background.transform.localScale = new Vector3(scale, scale, 1f);
+                    EditorUtility.SetDirty(background);
+                }
                 var borderPositions = new[]
                 {
                     new Vector2(0f, size.y * 0.5f),
@@ -150,8 +182,48 @@ namespace RogueLike.EditorTools
                     : $"已创建 {created} 个对象并保存场景。\n\n" +
                       "现在 Hierarchy 里能看到 GameManager / Main Camera / Player / Arena / UICanvas / 运行系统；\n" +
                       "选中 GameManager，在 Inspector 的 GameConfig 面板直接改数值。\n" +
+                      "玩家动画节点：Player/PlayerArt。可在 Animation 窗口编辑缩放；给 PlayerArt 添加 Animator Controller 后，创建 Hit Trigger 转场即可由受击触发。\n" +
                       "Play 时 GameBootstrap 会复用这些对象，不会销毁并重建你的布局。",
                 "好");
+        }
+
+        private static bool EnsurePlayerArt(GameObject player)
+        {
+            if (player == null) return false;
+            var rootRenderer = player.GetComponent<SpriteRenderer>();
+            if (rootRenderer == null) return false;
+            var art = player.transform.Find("PlayerArt");
+            bool changed = false;
+            if (art == null)
+            {
+                var artGo = new GameObject("PlayerArt");
+                Undo.RegisterCreatedObjectUndo(artGo, "创建玩家视觉节点");
+                artGo.transform.SetParent(player.transform, false);
+                art = artGo.transform;
+                var sr = artGo.AddComponent<SpriteRenderer>();
+                sr.sprite = rootRenderer.sprite;
+                sr.color = rootRenderer.color;
+                sr.sharedMaterial = rootRenderer.sharedMaterial;
+                sr.sortingLayerID = rootRenderer.sortingLayerID;
+                sr.sortingOrder = rootRenderer.sortingOrder;
+                sr.flipX = rootRenderer.flipX;
+                sr.flipY = rootRenderer.flipY;
+                rootRenderer.enabled = false;
+                EditorUtility.SetDirty(player);
+                changed = true;
+            }
+            else if (art.GetComponent<SpriteRenderer>() == null)
+            {
+                var sr = art.gameObject.AddComponent<SpriteRenderer>();
+                sr.sprite = rootRenderer.sprite;
+                sr.color = rootRenderer.color;
+                sr.sortingLayerID = rootRenderer.sortingLayerID;
+                sr.sortingOrder = rootRenderer.sortingOrder;
+                rootRenderer.enabled = false;
+                EditorUtility.SetDirty(art.gameObject);
+                changed = true;
+            }
+            return changed;
         }
 
         private static GameObject CreatePrefabChild(string path, Transform parent, string name)

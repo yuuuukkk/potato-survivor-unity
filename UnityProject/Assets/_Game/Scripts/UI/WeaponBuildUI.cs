@@ -191,31 +191,31 @@ namespace RogueLike.UI
 
             var selected = ws.Weapons[_selectedWeapon];
             _detailTitle.text = selected.Data.displayName + " · 第 " + (_selectedWeapon + 1) + " 槽";
-            _status.text = "已装 " + selected.ModificationIds.Count + "/" + selected.MaxModificationSlots +
-                " 项。自由组合；只有相同攻击形态互斥。";
+            _status.text = "构筑槽 " + selected.ModificationIds.Count + "/" + selected.MaxModificationSlots +
+                "（随武器等级增加）· 同组互斥" +
+                (selected.HasGrowthBuild ? "\n本武器成长 " + selected.GrowthStacks + "/" +
+                    selected.GrowthMaxStacks + " 层 · " + selected.GrowthKills + " 击杀" : "");
             AddBuildCard("原始攻击", "卸下这把武器的所有构筑，不影响其他同型号武器。",
                 selected.ModificationIds.Count == 0 ? "当前状态" : "卸下全部", selected.ModificationIds.Count != 0,
                 () => ws.UnequipModifications(_selectedWeapon));
 
             var all = new List<WeaponModificationData>();
             foreach (var mod in GameDatabase.WeaponModifications.Values)
-                if (mod != null && mod.AppliesTo(selected.Data)) all.Add(mod);
+                if (mod != null && !mod.IsBranch && mod.AppliesTo(selected.Data)) all.Add(mod);
             all.Sort((a, b) => string.CompareOrdinal(a.displayName, b.displayName));
             foreach (var mod in all)
             {
-                bool unlocked = false;
-                foreach (var owned in ws.UnlockedModifications(selected.Data.id))
-                    if (owned.id == mod.id) { unlocked = true; break; }
-                bool equipped = selected.HasModification(mod.id);
-                bool hasSpace = selected.ModificationIds.Count < selected.MaxModificationSlots ||
-                    selected.HasModificationGroup(mod.exclusiveGroup);
-                string state = equipped ? "卸下" : unlocked ? hasSpace ? "装备" : "先卸一项" : "未购买";
-                var captured = mod;
-                string level = unlocked ? "  Lv." + ws.ModificationLevel(mod.id) + "/" + mod.MaxLevel : "";
-                AddBuildCard((mod.IsUniversal ? "通用 · " : "") + mod.displayName + level,
-                    mod.description, state, equipped || unlocked && hasSpace,
-                    () => { if (equipped) ws.UnequipModification(_selectedWeapon, captured.id);
-                        else ws.EquipModification(_selectedWeapon, captured.id); });
+                AddModificationCard(mod, selected, ws);
+                // 只展示这把武器当前已激活基础构筑下的已解锁支线。
+                // 未解锁内容在商店购买，不占用装备配置列表。
+                if (!selected.HasModification(mod.id)) continue;
+                var branches = new List<WeaponModificationData>();
+                foreach (var candidate in GameDatabase.WeaponModifications.Values)
+                    if (candidate != null && candidate.parentId == mod.id &&
+                        candidate.AppliesTo(selected.Data) && ws.ModificationLevel(candidate.id) > 0)
+                        branches.Add(candidate);
+                branches.Sort((a, b) => string.CompareOrdinal(a.displayName, b.displayName));
+                foreach (var branch in branches) AddModificationCard(branch, selected, ws);
             }
             if (all.Count == 0)
                 AddBuildCard("暂无专属构筑", "这个型号目前还没有可购买的构筑。", "", false, null);
@@ -243,16 +243,45 @@ namespace RogueLike.UI
             }
         }
 
+        private void AddModificationCard(WeaponModificationData mod, WeaponInstance selected, WeaponSystem ws)
+        {
+            bool unlocked = ws.ModificationLevel(mod.id) > 0;
+            bool equipped = selected.HasModification(mod.id);
+            bool parentOwned = !mod.IsBranch || ws.ModificationLevel(mod.parentId) > 0;
+            bool parentEquipped = !mod.IsBranch || selected.HasModification(mod.parentId);
+            bool hasSpace = mod.IsBranch ? parentEquipped :
+                selected.ModificationIds.Count < selected.MaxModificationSlots ||
+                selected.HasModificationGroup(mod.exclusiveGroup);
+            string state = equipped ? "卸下" : !parentOwned ? "先买基础" : !unlocked ? "未购买" :
+                !parentEquipped ? "先装备基础" : hasSpace ? "选择支线" : "先卸一项";
+            if (!mod.IsBranch && unlocked && !equipped && hasSpace) state = "装备";
+            var captured = mod;
+            string level = unlocked ? "  Lv." + ws.ModificationLevel(mod.id) + "/" + mod.MaxLevel : "";
+            AddBuildCard((mod.IsBranch ? "└ 支线 · " : mod.IsUniversal ? "通用基础 · " : "基础 · ") +
+                mod.displayName + level, mod.description, state,
+                equipped || unlocked && parentEquipped && hasSpace,
+                () => { if (equipped) ws.UnequipModification(_selectedWeapon, captured.id);
+                    else ws.EquipModification(_selectedWeapon, captured.id); });
+        }
+
         private void AddBuildCard(string title, string description, string action, bool enabled, System.Action clicked)
         {
             var card = (RectTransform)UIFactory.CreateImage(_modList, new Color(0.30f, 0.26f, 0.32f),
                 Vector2.zero, new Vector2(595f, 124f)).rectTransform;
-            card.gameObject.AddComponent<LayoutElement>().preferredHeight = 124f;
-            UIFactory.CreateText(card, title, 18, Color.white,
-                new Vector2(-55f, 38f), new Vector2(440f, 28f), TextAnchor.MiddleLeft);
+            var layout = card.gameObject.AddComponent<LayoutElement>();
+            var heading = UIFactory.CreateText(card, title, 18, Color.white,
+                Vector2.zero, new Vector2(440f, 28f), TextAnchor.MiddleLeft);
             var body = UIFactory.CreateText(card, description, 14, new Color(0.89f, 0.85f, 0.81f),
-                new Vector2(-57f, -15f), new Vector2(435f, 72f), TextAnchor.MiddleLeft);
-            body.verticalOverflow = VerticalWrapMode.Truncate;
+                Vector2.zero, new Vector2(435f, 72f), TextAnchor.UpperLeft);
+            // A build's tradeoff must remain visible. Let the scroll list grow instead of
+            // silently cutting the description at a fixed two-line height.
+            float bodyHeight = Mathf.Max(72f, Mathf.Ceil(body.preferredHeight) + 8f);
+            float cardHeight = Mathf.Max(124f, bodyHeight + 58f);
+            layout.preferredHeight = cardHeight;
+            card.sizeDelta = new Vector2(card.sizeDelta.x, cardHeight);
+            body.rectTransform.sizeDelta = new Vector2(435f, bodyHeight);
+            heading.rectTransform.anchoredPosition = new Vector2(-55f, cardHeight * 0.5f - 24f);
+            body.rectTransform.anchoredPosition = new Vector2(-57f, cardHeight * 0.5f - 48f - bodyHeight * 0.5f);
             if (string.IsNullOrEmpty(action)) return;
             var button = UIFactory.CreateButton(card, action, () =>
             {

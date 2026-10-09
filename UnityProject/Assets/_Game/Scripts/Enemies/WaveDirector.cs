@@ -20,6 +20,8 @@ namespace RogueLike.Enemies
         private DirectorChallengeOffer _preparedChallenge;
 
         private float _budget;
+        private float _budgetCapacity;
+        private float _budgetRecoveryPerSecond;
         private bool _running;
         private bool _waveResolved;
         private Coroutine _spawnRoutine;
@@ -61,6 +63,9 @@ namespace RogueLike.Enemies
             TimeLeft = wave >= cfg.waveCount
                 ? cfg.finalWaveDuration
                 : Mathf.Min(cfg.waveDurationCap, cfg.waveDurationStart + cfg.waveDurationPerWave * (wave - 1));
+            _budgetCapacity = _budget;
+            _budgetRecoveryPerSecond = _budgetCapacity * Mathf.Max(0f, cfg.spawnBudgetSustainFraction) /
+                Mathf.Max(1f, TimeLeft);
 
             if (_spawnRoutine != null) StopCoroutine(_spawnRoutine);
             _spawnRoutine = StartCoroutine(SpawnLoop());
@@ -142,6 +147,8 @@ namespace RogueLike.Enemies
         private void Update()
         {
             if (!_running) return;
+            // The initial budget creates a wave opening; replenishment keeps combat active until the timer.
+            _budget = Mathf.Min(_budgetCapacity, _budget + _budgetRecoveryPerSecond * Time.deltaTime);
             TimeLeft -= Time.deltaTime;
             if (TimeLeft <= 0f)
             {
@@ -152,7 +159,7 @@ namespace RogueLike.Enemies
 
         private IEnumerator SpawnLoop()
         {
-            while (_running && _budget > 0f)
+            while (_running)
             {
                 SpawnBatch();
                 yield return new WaitForSeconds(CurrentInterval());
@@ -209,7 +216,7 @@ namespace RogueLike.Enemies
             foreach (var kv in GameDatabase.Enemies)
             {
                 if (kv.Value.isBoss || kv.Value.isElite) continue;
-                total += kv.Value.spawnWeight;
+                total += SpawnWeight(kv.Value);
             }
             if (total <= 0f) return null;
 
@@ -217,11 +224,27 @@ namespace RogueLike.Enemies
             foreach (var kv in GameDatabase.Enemies)
             {
                 if (kv.Value.isBoss || kv.Value.isElite) continue;
-                r -= kv.Value.spawnWeight;
+                float weight = SpawnWeight(kv.Value);
+                if (weight <= 0f) continue;
+                r -= weight;
                 if (r <= 0f) return kv.Key;
             }
             return null;
         }
+
+        private float SpawnWeight(EnemyData enemy)
+        {
+            if (CurrentWave < Mathf.Max(1, enemy.firstWave)) return 0f;
+            float weight = Mathf.Max(0, enemy.spawnWeight +
+                Mathf.Max(0, enemy.weightGainPerWave) * (CurrentWave - Mathf.Max(1, enemy.firstWave)));
+            if (ActiveChallenge != null && enemy.id == ActiveChallenge.Modifier.focusedEnemyId)
+                weight *= SafeMultiplier(ActiveChallenge.Modifier.focusedEnemyWeightMultiplier, 1f, 5f);
+            return weight;
+        }
+
+        // Missing serialized fields in older challenge assets must remain neutral.
+        private static float SafeMultiplier(float value, float minimum, float maximum) =>
+            value > 0f ? Mathf.Clamp(value, minimum, maximum) : 1f;
 
         private void SpawnBossesIfNeeded(int wave)
         {
@@ -240,8 +263,11 @@ namespace RogueLike.Enemies
             }
         }
 
-        public float HpScale() => Mathf.Pow(GameDatabase.WaveConfig.hpGrowth, CurrentWave - 1);
-        public float DmgScale() => Mathf.Pow(GameDatabase.WaveConfig.dmgGrowth, CurrentWave - 1);
-        public float SpeedScale() => 1f + GameDatabase.WaveConfig.speedGrowth * (CurrentWave - 1);
+        public float HpScale() => Mathf.Pow(GameDatabase.WaveConfig.hpGrowth, CurrentWave - 1) *
+            (ActiveChallenge != null ? SafeMultiplier(ActiveChallenge.Modifier.enemyHpMultiplier, 0.65f, 1.6f) : 1f);
+        public float DmgScale() => Mathf.Pow(GameDatabase.WaveConfig.dmgGrowth, CurrentWave - 1) *
+            (ActiveChallenge != null ? SafeMultiplier(ActiveChallenge.Modifier.enemyDamageMultiplier, 0.75f, 1.5f) : 1f);
+        public float SpeedScale() => (1f + GameDatabase.WaveConfig.speedGrowth * (CurrentWave - 1)) *
+            (ActiveChallenge != null ? SafeMultiplier(ActiveChallenge.Modifier.enemySpeedMultiplier, 0.75f, 1.35f) : 1f);
     }
 }

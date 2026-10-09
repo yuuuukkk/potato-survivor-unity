@@ -13,7 +13,10 @@ namespace RogueLike.Data
         BoomerangReturnSurge,
         VacuumRocket,
         SpringPunch,
-        BoomerangCollector
+        BoomerangCollector,
+        HonkProjectile,
+        BloodPackOnKill,
+        KillGrowth
     }
 
     /// <summary>闭集武器改造定义。AI 只能推荐 SO 中已有的 ID，不提供可执行逻辑。</summary>
@@ -25,6 +28,8 @@ namespace RogueLike.Data
         public string description;
         public string aiHint;
         public string weaponId;
+        // Empty = base build (uses one weapon slot); otherwise a branch of an owned base build.
+        public string parentId;
         public string exclusiveGroup = "attack-form";
         public WeaponModificationKind kind;
         public MeleeAnimationStyle meleeAnimation;
@@ -65,15 +70,30 @@ namespace RogueLike.Data
         [UnityEngine.Min(0f)] public float returnBonusPerPickup = 0.1f;
         [UnityEngine.Min(0f)] public float returnBonusPerPickupPerLevel = 0.05f;
         [UnityEngine.Min(1)] public int maxPickupBonusCount = 8;
+        [UnityEngine.Range(0f, 1f)] public float honkChance = 0.16f;
+        [UnityEngine.Range(0f, 1f)] public float honkChancePerLevel = 0.08f;
+        [UnityEngine.Min(0.1f)] public float honkRadius = 1.4f;
+        [UnityEngine.Min(0.1f)] public float honkDuration = 1.3f;
+        [UnityEngine.Range(0.1f, 1f)] public float honkMoveMultiplier = 0.65f;
+        public UnityEngine.Color honkTint = new UnityEngine.Color(0.58f, 0.88f, 1f, 1f);
+        [UnityEngine.Range(0f, 1f)] public float healthPackChance = 0.08f;
+        [UnityEngine.Range(0f, 1f)] public float healthPackChancePerLevel = 0.03f;
+        [UnityEngine.Min(1f)] public float healthPackHeal = 8f;
+        [UnityEngine.Min(1)] public int killsPerGrowthStack = 12;
+        [UnityEngine.Range(0f, 1f)] public float growthDamagePerStack = 0.04f;
+        [UnityEngine.Range(0f, 1f)] public float growthDamagePerStackPerLevel = 0.01f;
+        [UnityEngine.Min(1)] public int growthMaxStacks = 8;
 
         public bool IsUniversal => weaponId == "*";
+        public bool IsBranch => !string.IsNullOrWhiteSpace(parentId);
         public int MaxLevel => maxLevel > 0 ? maxLevel : 3;
         public bool AppliesTo(WeaponData weapon) => weapon != null && (IsUniversal
-            ? weapon.kind == WeaponKind.Projectile && weapon.attackPattern == WeaponAttackPattern.StandardProjectile
+            ? weapon.kind == WeaponKind.Projectile && weapon.attackPattern == WeaponAttackPattern.StandardProjectile &&
+              (kind == WeaponModificationKind.EnlargedProjectile || weapon.explodeRadius <= 0f)
             : weapon.id == weaponId);
 
         public bool IsValid => !string.IsNullOrWhiteSpace(id) &&
                                !string.IsNullOrWhiteSpace(weaponId) &&
-                               !string.IsNullOrWhiteSpace(exclusiveGroup);
+                               !string.IsNullOrWhiteSpace(exclusiveGroup) && parentId != id;
     }
 }

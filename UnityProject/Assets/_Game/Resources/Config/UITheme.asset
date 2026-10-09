@@ -14,14 +14,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   font: {fileID: 0}
   fallbackFontName: Microsoft YaHei
-  roundedPanel: {fileID: 21300000, guid: 5015fc7f69bb0684db980d8e1c88bcbc, type: 3}
-  roundedButton: {fileID: 21300000, guid: fa92207443a6a744197750d48e170740, type: 3}
-  roundedCard: {fileID: 21300000, guid: 5015fc7f69bb0684db980d8e1c88bcbc, type: 3}
+  roundedPanel: {fileID: 21300000, guid: e1a7c659b24543348c3f7faeff8c40d8, type: 3}
+  roundedButton: {fileID: 21300000, guid: 6c8279a16a0b4d208701f2048adc4f38, type: 3}
+  roundedCard: {fileID: 21300000, guid: 450dea982d8f41be9b18dd1a05318696, type: 3}
+  shopCardFrame: {fileID: 21300000, guid: a8d4b9e271554e32885da1008c6cc542, type: 3}
+  hudBarFrame: {fileID: 21300000, guid: 78c4f26d6c0e4f2998d493181673c3bf, type: 3}
   panelColor: {r: 1, g: 1, b: 1, a: 1}
   buttonColor: {r: 1, g: 1, b: 1, a: 1}
   textColor: {r: 1, g: 0.95, b: 0.85, a: 1}
   buttonTextColor: {r: 0.2, g: 0.14, b: 0.16, a: 1}
   unaffordableColor: {r: 0.95, g: 0.3, b: 0.3, a: 1}
+  healthFillColor: {r: 1, g: 0, b: 0, a: 1}
+  experienceFillColor: {r: 0, g: 1, b: 0, a: 1}
   reduceUiMotion: 0
   buttonHoverScale: 1.045
   buttonPressedScale: 0.95

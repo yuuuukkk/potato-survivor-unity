@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Globalization;
 using RogueLike.Combat;
 using RogueLike.Core;
 using RogueLike.Data;
@@ -30,6 +31,10 @@ namespace RogueLike.Items
     /// <summary>升级时提供四个互不重复的属性选项；武器与道具由商店构筑。</summary>
     public static class UpgradeRoller
     {
+        // 与 Rarity 的白、绿、蓝、紫、金、红顺序对应。基础数值从配置读取，品阶只放大本次强化。
+        private static readonly float[] StatTierMultipliers = { 1f, 1.5f, 2f, 2.5f, 3f, 4f };
+        private static readonly float[] DefaultTierWeights = { 50f, 30f, 15f, 4.5f, 0.8f, 0.1f };
+
         public static List<UpgradeOption> Roll(int count = 4)
         {
             var opts = new List<UpgradeOption>();
@@ -48,14 +53,7 @@ namespace RogueLike.Items
             {
                 var source = pool[indices[i]];
                 if (source == null || string.IsNullOrEmpty(source.displayName) || !used.Add(source.displayName)) continue;
-                opts.Add(new UpgradeOption
-                {
-                    Kind = UpgradeKind.Stat,
-                    Mod = new StatModifier(source.statType, source.flat, source.percent),
-                    Title = source.displayName,
-                    Description = StatDesc(source),
-                    Rarity = Rarity.Common
-                });
+                opts.Add(MakeStatOption(source));
             }
             return opts;
         }
@@ -104,20 +102,76 @@ namespace RogueLike.Items
                 ? cfg.upgradeStatOptions : null;
             if (pool == null) return null;
             var o = pool[Random.Range(0, pool.Count)];
+            return MakeStatOption(o);
+        }
+
+        private static UpgradeOption MakeStatOption(UpgradeStatOption source)
+        {
+            Rarity rarity = RollStatRarity();
+            float multiplier = StatTierMultipliers[(int)rarity];
+            string originalAmount = source.displayName.Substring(source.displayName.LastIndexOf(' ') + 1);
+            bool isPercent = originalAmount.Contains("%");
+            float flat = source.flat * multiplier;
+            float percent = source.percent * multiplier;
+            // 展示值与实际生效值使用相同精度，避免卡片写 +5% 而实际得到 +4.5%。
+            if (isPercent)
+            {
+                flat = Mathf.Round(flat * 1000f) / 1000f;
+                percent = Mathf.Round(percent * 1000f) / 1000f;
+            }
+            else
+            {
+                flat = Mathf.Round(flat * 10f) / 10f;
+                percent = Mathf.Round(percent * 10f) / 10f;
+            }
+
+            string title = FormatStatTitle(source.displayName, flat, percent, isPercent);
             return new UpgradeOption
             {
                 Kind = UpgradeKind.Stat,
-                Mod = new StatModifier(o.statType, o.flat, o.percent),
-                Title = o.displayName,
-                Description = StatDesc(o),
-                Rarity = Rarity.Common
+                Mod = new StatModifier(source.statType, flat, percent),
+                Title = title,
+                Description = string.Empty,
+                Rarity = rarity
             };
         }
 
-        private static string StatDesc(UpgradeStatOption o)
+        private static Rarity RollStatRarity()
         {
-            if (o.percent > 0f) return $"属性提升：{o.displayName}（永久）";
-            return $"属性提升：{o.displayName}（永久）";
+            var config = GameDatabase.WaveConfig;
+            var weights = config != null ? config.rarityWeights : null;
+            int wave = GameManager.Instance != null ? GameManager.Instance.Wave : 1;
+            float total = 0f;
+            for (int tier = 0; tier <= (int)Rarity.Red; tier++)
+            {
+                if (wave < RarityInfo.UnlockWave((Rarity)tier)) continue;
+                total += Mathf.Max(0f, weights != null && tier < weights.Count
+                    ? weights[tier] : DefaultTierWeights[tier]);
+            }
+            if (total <= 0f) return Rarity.Common;
+
+            float roll = Random.value * total;
+            for (int tier = 0; tier <= (int)Rarity.Red; tier++)
+            {
+                if (wave < RarityInfo.UnlockWave((Rarity)tier)) continue;
+                roll -= Mathf.Max(0f, weights != null && tier < weights.Count
+                    ? weights[tier] : DefaultTierWeights[tier]);
+                if (roll <= 0f) return (Rarity)tier;
+            }
+            return Rarity.Common;
+        }
+
+        private static string FormatStatTitle(string displayName, float flat, float percent, bool isPercent)
+        {
+            int split = displayName.LastIndexOf(' ');
+            string name = split > 0 ? displayName.Substring(0, split) : displayName;
+            string originalAmount = split > 0 ? displayName.Substring(split + 1) : string.Empty;
+            float value = Mathf.Abs(percent) > 0f ? percent : flat;
+            if (isPercent) value *= 100f;
+            string sign = value < 0f ? "-" : "+";
+            string unit = isPercent ? "%" : originalAmount.Contains("/")
+                ? originalAmount.Substring(originalAmount.IndexOf('/')) : string.Empty;
+            return name + " " + sign + Mathf.Abs(value).ToString("0.#", CultureInfo.InvariantCulture) + unit;
         }
 
         private static UpgradeOption MakeWeapon()

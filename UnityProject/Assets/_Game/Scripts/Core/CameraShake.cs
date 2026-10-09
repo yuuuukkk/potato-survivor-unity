@@ -22,17 +22,23 @@ namespace RogueLike.Core
             if (Instance != null) Instance.StartShake(duration, magnitude);
         }
 
+        // A real player hit must restart the feedback even while another shake is fading out.
+        public static void ShakePlayerHit(float duration, float magnitude)
+        {
+            if (Instance != null) Instance.StartShake(duration, magnitude, true);
+        }
+
         private void Awake()
         {
             Instance = this;
         }
 
-        private void StartShake(float duration, float magnitude)
+        private void StartShake(float duration, float magnitude, bool restart = false)
         {
             if (duration <= 0f || magnitude <= 0f) return;
             // 高频普通命中不能覆盖玩家受击等更强的镜头反馈。
             float remainingStrength = _t < _dur ? _mag * (1f - _t / _dur) : 0f;
-            if (magnitude <= remainingStrength) return;
+            if (!restart && magnitude <= remainingStrength) return;
             _dur = duration;
             _mag = magnitude;
             _t = 0f;

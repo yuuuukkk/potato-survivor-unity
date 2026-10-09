@@ -146,7 +146,7 @@ namespace RogueLike.Items
             "Reply with JSON only: {\"offers\":[{\"modifierId\":\"id\",\"title\":\"short Chinese title\"}, ...]}. " +
             "Return exactly four offers, ordered from tier 1 to tier 4. Select one ID per offer only from allowedModifiers. " +
             "The game applies fixed, increasing tier difficulty and rewards; you only choose each tier's modifier and title. " +
-            "Use at least two different modifiers when the catalog allows it. " +
+            "Use a different modifier for each of the four offers when the catalog allows it. " +
             "Do not invent effects, enemies, rewards, numeric values, scripts or extra fields. " +
             "Use last-wave performance and the build to propose interesting, fair risk/reward choices. " +
             "Do not counter the player so strongly that their build becomes unusable.";

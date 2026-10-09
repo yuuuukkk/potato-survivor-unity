@@ -14,6 +14,10 @@ namespace RogueLike.Combat
         private Text _text;
         private float _life;
         private float _t;
+        private Vector2 _startPosition;
+        private float _sideDrift;
+        private Color _baseColor;
+        private bool _critical;
         private ObjectPool _pool;
 
         private void Awake()
@@ -54,9 +58,11 @@ namespace RogueLike.Combat
         {
             _pool = pool;
             _text.text = content;
-            _text.color = color;
+            _baseColor = color;
+            _text.color = _baseColor;
             _text.fontSize = crit ? 30 : 20;
             _text.fontStyle = crit ? FontStyle.Bold : FontStyle.Normal;
+            _critical = crit;
 
             if (Canvas != null && Camera.main != null)
             {
@@ -66,6 +72,9 @@ namespace RogueLike.Combat
                     (RectTransform)Canvas.transform, sp, null, out var local))
                     rt.anchoredPosition = local;
             }
+            _startPosition = ((RectTransform)transform).anchoredPosition;
+            _sideDrift = Random.Range(-16f, 16f);
+            transform.localScale = Vector3.one * (crit ? 1.35f : 1.12f);
             _life = crit ? 0.8f : 0.6f;
             _t = 0f;
         }
@@ -78,11 +87,14 @@ namespace RogueLike.Combat
                 if (_pool != null) _pool.Release(gameObject);
                 return;
             }
-            float p = 1f - _t / _life;
+            float progress = Mathf.Clamp01(_t / _life);
+            float rise = Mathf.SmoothStep(0f, 1f, progress);
             var rt = (RectTransform)transform;
-            rt.anchoredPosition += new Vector2(0f, 40f * Time.deltaTime);
-            var c = _text.color;
-            c.a = p;
+            rt.anchoredPosition = _startPosition + new Vector2(_sideDrift * rise, 42f * rise);
+            float settle = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(_t / 0.18f));
+            rt.localScale = Vector3.one * Mathf.Lerp(_critical ? 1.35f : 1.12f, 1f, settle);
+            var c = _baseColor;
+            c.a *= 1f - progress * progress;
             _text.color = c;
         }
     }

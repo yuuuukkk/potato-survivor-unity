@@ -36,7 +36,6 @@ namespace RogueLike.Core
         public float normalEnemyScale = 1.12f;
         public float heldWeaponDistanceBonus = 0.10f;
         [Header("弹道构筑")]
-        [Range(1, 6)] public int maxEquippedModifications = 2;
         [Range(0, 8)] public int maxProjectileBounces = 3;
         [Min(0f)] public float ricochetExtraRangePerBounce = 1f;
         [Min(1f)] public float maxProjectileSizeMultiplier = 2f;
@@ -51,22 +50,33 @@ namespace RogueLike.Core
         public float baseCritDamageMultiplier = 2f;
         public float basePickupRange = 1.6f;
         public float baseMoveSpeed = 3.5f;
+        [Header("移动动画（仅角色图片，不改变碰撞与武器）")]
+        [Range(0f, 0.15f)] public float playerWalkSquashAmount = 0.055f;
+        [Min(0f)] public float playerWalkStepFrequency = 5.5f;
+        [Min(0.1f)] public float playerWalkSettleSpeed = 16f;
+        [Header("魔王法术时机")]
+        [Min(0.05f)] public float bossMagicChargeDuration = 0.32f;
+        [Min(0.05f)] public float bossMagicWarningDuration = 0.8f;
         [Header("受击反馈")]
         [Range(0f, 1f)] public float screenShakeScale = 0.75f;
-        public float playerHitShakeDuration = 0.17f;
-        public float playerHitShakeMagnitude = 0.105f;
-        public float playerHitFlashDuration = 0.22f;
-        public Color playerHitTint = new Color(1f, 0.38f, 0.38f, 1f);
+        [Min(0f)] public float playerHitShakeDuration = 0.17f; // 玩家受击闪红也使用此时长
+        [Min(0f)] public float playerHitShakeMagnitude = 0.105f;
+        public Color playerHitTint = new Color(1f, 0.18f, 0.18f, 1f);
         public float playerHitRecoilSpeed = 2.6f;
         public float enemyHitFlashDuration = 0.12f;
-        public Color enemyHitTint = new Color(1f, 0.55f, 0.35f, 1f);
+        public Color enemyHitTint = Color.white;
         public float enemyHitSquash = 0.16f;
         public float enemyHitStunDuration = 0.055f;
         public float impactDuration = 0.18f;
         public float impactSize = 1f;
         public Color impactColor = new Color(1f, 0.86f, 0.47f, 1f);
         public float impactShakeMagnitude = 0.025f;
+        [Min(0f)] public float meleeHitShakeMagnitude = 0.018f;
+        [Min(0f)] public float meleeHitShakeDuration = 0.06f;
         public int impactMaxActive = 18;
+        [Header("敌人死亡表现")]
+        [Range(0, 100)] public int enemyDeathMaxActive = 30;
+        [Min(0.05f)] public float enemyDeathDuration = 0.24f;
         [Range(0, 100)] public int damageNumberMaxActive = 24;
         [Header("命中音效（留空时使用内置短音）")]
         public AudioClip enemyHitSound;

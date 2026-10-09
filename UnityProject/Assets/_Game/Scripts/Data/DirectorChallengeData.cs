@@ -15,6 +15,12 @@ namespace RogueLike.Data
         [Range(0.5f, 1f)] public float spawnIntervalMultiplier = 1f;
         [Min(0)] public int maxAliveBonus;
         [Range(0, 2)] public int openingEliteCount;
+        // Challenge-specific enemy pressure. Values are clamped again when used so edited assets stay safe.
+        [Range(0.65f, 1.6f)] public float enemyHpMultiplier = 1f;
+        [Range(0.75f, 1.5f)] public float enemyDamageMultiplier = 1f;
+        [Range(0.75f, 1.35f)] public float enemySpeedMultiplier = 1f;
+        public string focusedEnemyId;
+        [Range(1f, 5f)] public float focusedEnemyWeightMultiplier = 1f;
         [Min(0)] public int rewardMaterials;
 
         public bool IsValid => !string.IsNullOrWhiteSpace(id) &&

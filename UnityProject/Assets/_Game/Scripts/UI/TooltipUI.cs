@@ -30,10 +30,10 @@ namespace RogueLike.UI
             if (_panel == null)
             {
                 _panel = (RectTransform)UIFactory.CreateImage(transform,
-                    new Color(0.08f, 0.08f, 0.12f, 0.96f), new Vector2(-600f, 320f), new Vector2(320f, 110f)).rectTransform;
+                    new Color(0.08f, 0.08f, 0.12f, 0.96f), new Vector2(-600f, 320f), new Vector2(420f, 210f)).rectTransform;
                 _bg = _panel.GetComponent<Image>();
-                _title = UIFactory.CreateText(_panel, "", 17, Color.white, new Vector2(0f, 30f), new Vector2(296f, 26f));
-                _body = UIFactory.CreateText(_panel, "", 13, new Color(0.80f, 0.80f, 0.88f), new Vector2(0f, -4f), new Vector2(296f, 40f));
+                _title = UIFactory.CreateText(_panel, "", 17, Color.white, new Vector2(0f, 78f), new Vector2(392f, 32f));
+                _body = UIFactory.CreateText(_panel, "", 16, new Color(0.80f, 0.80f, 0.88f), new Vector2(0f, -10f), new Vector2(392f, 148f));
                 _body.alignment = TextAnchor.UpperCenter;
             }
 
@@ -44,10 +44,16 @@ namespace RogueLike.UI
         {
             if (!_visible) return;
             // Overlay 画布：anchoredPosition = (鼠标像素 - 屏幕中心) / scaleFactor
-            Vector2 half = new Vector2(Screen.width * 0.5f, Screen.height * 0.5f);
-            Vector2 pos = ((Vector2)Input.mousePosition - half) / _canvas.scaleFactor;
-            pos += new Vector2(8f, 8f);
-            _panel.anchoredPosition = pos;
+            float scale = Mathf.Max(0.001f, _canvas.scaleFactor);
+            Vector2 sizePixels = _panel.rect.size * scale;
+            Rect safe = Screen.safeArea;
+            if (safe.width <= 0f || safe.height <= 0f)
+                safe = new Rect(0f, 0f, Screen.width, Screen.height);
+            Vector2 pointer = Input.mousePosition;
+            Vector2 center = pointer + sizePixels * 0.5f + new Vector2(12f, 12f);
+            center.x = Mathf.Clamp(center.x, safe.xMin + sizePixels.x * 0.5f, safe.xMax - sizePixels.x * 0.5f);
+            center.y = Mathf.Clamp(center.y, safe.yMin + sizePixels.y * 0.5f, safe.yMax - sizePixels.y * 0.5f);
+            _panel.anchoredPosition = (center - new Vector2(Screen.width * 0.5f, Screen.height * 0.5f)) / scale;
             _panel.SetAsLastSibling();
         }
 
@@ -57,7 +63,6 @@ namespace RogueLike.UI
             _title.text = title;
             _title.color = color;
             _body.text = body;
-            _panel.sizeDelta = size;
             _panel.gameObject.SetActive(true);
         }
 

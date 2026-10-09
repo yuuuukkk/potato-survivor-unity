@@ -58,5 +58,14 @@ namespace RogueLike.Core
 
         public static Sprite LoadExperienceSprite()
             => LoadNamed("Art/Effects/pickup_experience");
+
+        public static Sprite LoadMaterialPickupSprite()
+            => LoadNamed("Art/Effects/pickup_material");
+
+        public static Sprite LoadHealingPickupSprite()
+            => LoadNamed("Art/Effects/pickup_healing_seed");
+
+        public static Sprite LoadBuildEffectSprite(string id)
+            => LoadNamed("Art/Effects/build_" + id);
     }
 }

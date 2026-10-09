@@ -36,10 +36,26 @@ namespace RogueLike.Items
                     Tier.maxAliveBonus + Modifier.maxAliveBonus);
                 int elites = Mathf.Min(balance != null ? Mathf.Max(0, balance.directorMaxOpeningElites) : 2,
                     Tier.openingEliteBonus + Modifier.openingEliteCount);
-                return $"敌量×{budget:0.##} · 出怪间隔×{interval:0.##} · 同屏+{alive}" +
-                    (elites > 0 ? $" · 精英+{elites}" : "") + "\n" + Modifier.riskDescription;
+                string pressure = $"敌量×{budget:0.##} · 间隔×{interval:0.##} · 同屏+{alive}" +
+                    (elites > 0 ? $" · 精英+{elites}" : "");
+                string special = string.Empty;
+                float hp = SafeMultiplier(Modifier.enemyHpMultiplier, 0.65f, 1.6f);
+                float damage = SafeMultiplier(Modifier.enemyDamageMultiplier, 0.75f, 1.5f);
+                float speed = SafeMultiplier(Modifier.enemySpeedMultiplier, 0.75f, 1.35f);
+                if (!Mathf.Approximately(hp, 1f)) special += $"生命×{hp:0.##} ";
+                if (!Mathf.Approximately(damage, 1f)) special += $"伤害×{damage:0.##} ";
+                if (!Mathf.Approximately(speed, 1f)) special += $"移速×{speed:0.##} ";
+                if (!string.IsNullOrWhiteSpace(Modifier.focusedEnemyId))
+                {
+                    var enemy = GameDatabase.GetEnemy(Modifier.focusedEnemyId);
+                    string name = enemy != null ? enemy.displayName : Modifier.focusedEnemyId;
+                    special += $"{name}权重×{SafeMultiplier(Modifier.focusedEnemyWeightMultiplier, 1f, 5f):0.##}";
+                }
+                return pressure + "\n" + (string.IsNullOrWhiteSpace(special) ? Modifier.riskDescription : special.Trim());
             }
         }
+        private static float SafeMultiplier(float value, float minimum, float maximum) =>
+            value > 0f ? Mathf.Clamp(value, minimum, maximum) : 1f;
         public string Key => TierIndex + ":" + Modifier.id;
     }
 }

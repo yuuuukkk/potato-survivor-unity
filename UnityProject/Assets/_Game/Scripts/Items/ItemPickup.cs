@@ -14,15 +14,18 @@ namespace RogueLike.Items
         private int _value;
         private ObjectPool _pool;
         private bool _isExperience;
+        private bool _isHealth;
         private bool _collected;
         public int Value => _value;
         public bool IsExperience => _isExperience;
+        public bool IsHealth => _isHealth;
 
-        public void Init(int value, ObjectPool pool, bool isExperience = false)
+        public void Init(int value, ObjectPool pool, bool isExperience = false, bool isHealth = false)
         {
             _value = value;
             _pool = pool;
             _isExperience = isExperience;
+            _isHealth = isHealth;
             _collected = false;
             ItemPool.Register(this);
         }
@@ -57,6 +60,11 @@ namespace RogueLike.Items
                 if (xp == null) return false;
                 _collected = true;
                 xp.AddExp(_value);
+            }
+            else if (_isHealth)
+            {
+                _collected = true;
+                gm.Player.Health.Heal(_value);
             }
             else
             {

@@ -388,7 +388,12 @@ namespace RogueLike.Player
                             dir, rangeScale, samplePhase, out poseOffset, out poseAngle);
                         Vector2 localTip = MeleeAttackGeometry.TipPosition(_anchors[weapon], tipLocal, poseOffset, poseAngle);
                         Vector2 currentTip = currentTransform.MultiplyPoint3x4(localTip);
-                        _weaponSystem.ResolveMeleeAttackHit(weapon, previousTip, currentTip);
+                        Vector2 localBladeDirection = new Vector2(
+                            Mathf.Cos(poseAngle * Mathf.Deg2Rad),
+                            Mathf.Sin(poseAngle * Mathf.Deg2Rad));
+                        Vector2 bladeDirection = currentTransform.MultiplyVector(localBladeDirection);
+                        _weaponSystem.ResolveMeleeAttackHit(weapon, previousTip, currentTip,
+                            samplePhase, bladeDirection);
                         previousTip = currentTip;
                     }
                 }

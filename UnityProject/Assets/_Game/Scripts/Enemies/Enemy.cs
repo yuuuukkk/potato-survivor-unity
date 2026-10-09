@@ -19,6 +19,7 @@ namespace RogueLike.Enemies
         public bool IsAlive => !_dead;
         public bool IsBoss => Data != null && Data.isBoss;
         public bool IsCharmed => !_dead && _charmTimer > 0f;
+        public WeaponInstance LastHitWeapon { get; private set; }
         public CircleCollider2D BodyCollider => _col;
 
         public float HpScale { get; private set; } = 1f;
@@ -26,6 +27,8 @@ namespace RogueLike.Enemies
         public float SpeedScale { get; private set; } = 1f;
 
         private SpriteRenderer _sr;
+        private SpriteRenderer _flashRenderer;
+        private static Material _whiteFlashMaterial;
         private CircleCollider2D _col;
         private Color _baseColor;
         private Color _restColor = Color.white; // 受击闪白后恢复的目标色（配图=白/原色，占位=配置色）
@@ -35,6 +38,9 @@ namespace RogueLike.Enemies
         private float _charmAttackCooldown;
         private float _charmRetargetTimer;
         private Enemy _charmTarget;
+        private float _honkTimer;
+        private float _honkMoveMultiplier = 1f;
+        private Color _honkTint;
         private float _scale = 1f;
         private float _flashTimer;
         private float _hitStunTimer;
@@ -55,6 +61,23 @@ namespace RogueLike.Enemies
         {
             _sr = GetComponent<SpriteRenderer>();
             if (_sr == null) _sr = gameObject.AddComponent<SpriteRenderer>();
+            if (_whiteFlashMaterial == null)
+            {
+                var shader = Resources.Load<Shader>("Shaders/SpriteWhiteFlash");
+                if (shader != null)
+                {
+                    _whiteFlashMaterial = new Material(shader);
+                    _whiteFlashMaterial.SetFloat("_FlashAmount", 1f);
+                }
+            }
+            if (_whiteFlashMaterial != null)
+            {
+                var flashVisual = new GameObject("HitFlashVisual");
+                flashVisual.transform.SetParent(transform, false);
+                _flashRenderer = flashVisual.AddComponent<SpriteRenderer>();
+                _flashRenderer.sharedMaterial = _whiteFlashMaterial;
+                _flashRenderer.enabled = false;
+            }
             _col = GetComponent<CircleCollider2D>();
             if (_col == null) _col = gameObject.AddComponent<CircleCollider2D>();
             _col.isTrigger = true;
@@ -76,6 +99,7 @@ namespace RogueLike.Enemies
             Hp = data.maxHp * hpScale;
             _pool = pool;
             _dead = false;
+            LastHitWeapon = null;
             _contactCooldown = 0f;
             _rangedCooldown = 1.2f;
             _bossCooldown = 3f;
@@ -91,6 +115,8 @@ namespace RogueLike.Enemies
             _charmAttackCooldown = 0f;
             _charmRetargetTimer = 0f;
             _charmTarget = null;
+            _honkTimer = 0f;
+            _honkMoveMultiplier = 1f;
 
             float normalScale = GameDatabase.Balance != null ?
                 Mathf.Max(0.1f, GameDatabase.Balance.normalEnemyScale) : 1.12f;
@@ -119,6 +145,13 @@ namespace RogueLike.Enemies
             _normalRestColor = _restColor;
             _sr.color = _restColor;
             _sr.sortingOrder = data.isBoss ? 6 : 2;
+            if (_flashRenderer != null)
+            {
+                _flashRenderer.sprite = _sr.sprite;
+                _flashRenderer.sortingLayerID = _sr.sortingLayerID;
+                _flashRenderer.sortingOrder = _sr.sortingOrder + 1;
+                _flashRenderer.enabled = false;
+            }
             _col.radius = data.radius;
 
             EnemyManager.Register(this);
@@ -127,13 +160,14 @@ namespace RogueLike.Enemies
         public void TakeDamage(DamageInfo info)
         {
             if (_dead) return;
+            LastHitWeapon = info.weapon;
             Hp -= info.amount;
             var balance = GameDatabase.Balance;
             _flashTimer = Mathf.Max(0.03f, balance != null ? balance.enemyHitFlashDuration : 0.12f);
             // A stream of tiny SMG hits must not permanently stun an enemy.
             if (info.isCrit || info.amount >= Data.maxHp * HpScale * 0.12f)
                 _hitStunTimer = Mathf.Max(0f, balance != null ? balance.enemyHitStunDuration : 0.055f);
-            _sr.color = balance != null ? balance.enemyHitTint : new Color(1f, 0.55f, 0.35f);
+            SetWhiteFlash(1f);
 
             Vector2 away = Vector2.right;
             if (info.source != null)
@@ -147,10 +181,17 @@ namespace RogueLike.Enemies
             Vector3 impactPoint = transform.position - (Vector3)away * (Data.radius * _scale * 0.75f);
             HitImpact.Spawn(impactPoint, away, info.isCrit);
             CombatAudio.PlayEnemyHit(info.isCrit);
-            if ((info.isCrit || info.impact > 0f) && Time.time >= _nextImpactShakeTime)
+            bool meleeHit = info.weapon != null && info.weapon.Data != null &&
+                info.weapon.Data.kind == WeaponKind.Melee;
+            if ((meleeHit || info.isCrit || info.impact > 0f) && Time.time >= _nextImpactShakeTime)
             {
-                float magnitude = balance != null ? balance.impactShakeMagnitude : 0.025f;
-                CameraShake.Shake(0.075f, magnitude * Mathf.Max(info.isCrit ? 1.5f : 1f, info.impact));
+                float magnitude = meleeHit
+                    ? balance != null ? balance.meleeHitShakeMagnitude : 0.018f
+                    : balance != null ? balance.impactShakeMagnitude : 0.025f;
+                float duration = meleeHit
+                    ? balance != null ? balance.meleeHitShakeDuration : 0.06f
+                    : 0.075f;
+                CameraShake.Shake(duration, magnitude * Mathf.Max(info.isCrit ? 1.5f : 1f, info.impact));
                 _nextImpactShakeTime = Time.time + 0.10f;
             }
 
@@ -172,6 +213,20 @@ namespace RogueLike.Enemies
             _restColor = GameDatabase.Balance != null ? GameDatabase.Balance.charmTint :
                 new Color(1f, 0.55f, 0.86f);
             if (_flashTimer <= 0f) _sr.color = _restColor;
+        }
+
+        /// <summary>音波只短暂拖慢普通怪，保留原本的近战/远程攻击类型。</summary>
+        public void ApplyHonkSlow(float duration, float moveMultiplier, Color tint)
+        {
+            if (_dead || Data == null || Data.isBoss || Data.isElite || duration <= 0f) return;
+            _honkTimer = Mathf.Max(_honkTimer, duration);
+            _honkMoveMultiplier = Mathf.Min(_honkMoveMultiplier, Mathf.Clamp(moveMultiplier, 0.1f, 1f));
+            _honkTint = tint;
+            if (!IsCharmed)
+            {
+                _restColor = _honkTint;
+                if (_flashTimer <= 0f) _sr.color = _restColor;
+            }
         }
 
         public void ArmSpringCollision(float damage, float duration, GameObject source)
@@ -219,14 +274,31 @@ namespace RogueLike.Enemies
 
             // 材料掉落
             int m = Random.Range(Data.materialDropMin, Data.materialDropMax + 1);
-            if (m > 0) ItemPool.Spawn(transform.position, m);
+            if (m > 0) ItemPool.Spawn(transform.position + Vector3.left * 0.24f, m);
 
             // 经验留在地面，玩家靠近后磁吸拾取。
-            if (Data.expReward > 0) ItemPool.SpawnExperience(transform.position, Data.expReward);
+            if (Data.expReward > 0)
+                ItemPool.SpawnExperience(transform.position + Vector3.right * 0.24f, Data.expReward);
 
             if (GameManager.Instance != null) GameManager.Instance.AddKill();
             EnemyManager.Unregister(this);
             EventBus.RaiseEnemyKilled(this);
+
+            if (_sr.sprite != null)
+            {
+                var deathPool = GamePools.Get("enemy_death_vfx", EnemyDeathVfx.CreateGo);
+                int maxActive = GameDatabase.Balance != null ? GameDatabase.Balance.enemyDeathMaxActive : 30;
+                if (deathPool.ActiveCount < maxActive)
+                {
+                    var deathGo = deathPool.Get(transform.position);
+                    if (deathGo != null)
+                    {
+                        float duration = GameDatabase.Balance != null ? GameDatabase.Balance.enemyDeathDuration : 0.24f;
+                        deathGo.GetComponent<EnemyDeathVfx>().Play(_sr, _restColor, transform.localScale,
+                            duration, deathPool);
+                    }
+                }
+            }
 
             if (_pool != null) _pool.Release(gameObject);
         }
@@ -252,15 +324,32 @@ namespace RogueLike.Enemies
                 var balance = GameDatabase.Balance;
                 float duration = Mathf.Max(0.03f, balance != null ? balance.enemyHitFlashDuration : 0.12f);
                 float intensity = Mathf.Clamp01(_flashTimer / duration);
-                _sr.color = Color.Lerp(_restColor,
-                    balance != null ? balance.enemyHitTint : new Color(1f, 0.55f, 0.35f), intensity);
+                SetWhiteFlash(intensity);
                 float squash = balance != null ? balance.enemyHitSquash : 0.16f;
                 transform.localScale = new Vector3(_scale * (1f + squash * intensity),
                     _scale * (1f - squash * intensity), _scale);
-                if (_flashTimer <= 0f) transform.localScale = Vector3.one * _scale;
+                if (_flashTimer <= 0f)
+                {
+                    SetWhiteFlash(0f);
+                    transform.localScale = Vector3.one * _scale;
+                }
             }
 
             if (_hitStunTimer > 0f) _hitStunTimer -= Time.deltaTime;
+
+            if (_honkTimer > 0f)
+            {
+                _honkTimer -= Time.deltaTime;
+                if (_honkTimer <= 0f)
+                {
+                    _honkMoveMultiplier = 1f;
+                    _restColor = IsCharmed
+                        ? GameDatabase.Balance != null ? GameDatabase.Balance.charmTint :
+                            new Color(1f, 0.55f, 0.86f)
+                        : _normalRestColor;
+                    if (_flashTimer <= 0f) _sr.color = _restColor;
+                }
+            }
 
             _knockVel = Vector2.MoveTowards(_knockVel, Vector2.zero, 14f * Time.deltaTime);
 
@@ -270,7 +359,7 @@ namespace RogueLike.Enemies
                 if (_charmTimer <= 0f)
                 {
                     _charmTarget = null;
-                    _restColor = _normalRestColor;
+                    _restColor = _honkTimer > 0f ? _honkTint : _normalRestColor;
                     if (_flashTimer <= 0f) _sr.color = _restColor;
                 }
                 else
@@ -290,7 +379,7 @@ namespace RogueLike.Enemies
                     {
                         Vector2 delta = victim.transform.position - transform.position;
                         float distance = delta.magnitude;
-                        float charmedMoveSpeed = Data.moveSpeed * SpeedScale;
+                        float charmedMoveSpeed = Data.moveSpeed * SpeedScale * _honkMoveMultiplier;
                         Vector2 movement = delta.normalized * charmedMoveSpeed;
                         // Keep the original ranged enemy's preferred distance and projectile attack.
                         if (Data.ranged && Data.behavior == 1)
@@ -334,7 +423,7 @@ namespace RogueLike.Enemies
 
             Vector2 toPlayer = (Vector2)(gm.Player.transform.position - transform.position);
             float dist = toPlayer.magnitude;
-            float speed = Data.moveSpeed * SpeedScale;
+            float speed = Data.moveSpeed * SpeedScale * _honkMoveMultiplier;
             Vector2 move = Vector2.zero;
 
             switch (Data.behavior)
@@ -409,11 +498,10 @@ namespace RogueLike.Enemies
             Vector2 dir = ((Vector2)(gm.Player.transform.position - transform.position)).normalized;
             var pool = GamePools.Get("enemy_bullet", BuildEnemyBulletGo);
             var go = pool.Get(transform.position);
-            var renderer = go.GetComponent<SpriteRenderer>();
-            if (renderer != null) renderer.color = new Color(1f, 0.35f, 0.35f);
             var proj = go.GetComponent<Projectile>();
             proj.Launch(transform.position, dir, 1, Data.rangedDamage * DmgScale,
                 Data.projectileSpeed, 8f, 0, 0f, false, false, pool, null);
+            SetEnemyBulletArt(go, "enemy_spore", Color.white);
         }
 
         private void ShootRangedAt(Enemy target)
@@ -422,14 +510,13 @@ namespace RogueLike.Enemies
             Vector2 dir = ((Vector2)(target.transform.position - transform.position)).normalized;
             var pool = GamePools.Get("enemy_bullet", BuildEnemyBulletGo);
             var go = pool.Get(transform.position);
-            var renderer = go.GetComponent<SpriteRenderer>();
-            if (renderer != null) renderer.color = GameDatabase.Balance != null
-                ? GameDatabase.Balance.charmTint : new Color(1f, 0.55f, 0.86f);
             var projectile = go.GetComponent<Projectile>();
             float charmedDamage = Mathf.Max(Data.rangedDamage * DmgScale,
                 _charmDamagePerSecond * Mathf.Max(0.1f, Data.rangedInterval));
             projectile.Launch(transform.position, dir, 2, charmedDamage,
                 Data.projectileSpeed, 8f, 0, 0f, false, false, pool, null);
+            SetEnemyBulletArt(go, "enemy_elite", GameDatabase.Balance != null
+                ? GameDatabase.Balance.charmTint : new Color(1f, 0.75f, 0.95f));
             projectile.ConfigureFriendlyEnemyShot(this, target);
         }
 
@@ -466,22 +553,35 @@ namespace RogueLike.Enemies
             var gm = GameManager.Instance;
             if (gm == null || gm.Player == null) yield break;
 
-            // 锁定发射点与方向，预警和实际弹道使用同一组数据。
+            // 红色攻击锁定弹道；魔法攻击先在魔王身边蓄力，再锁定落点预警。
             _bossCharging = true;
             _knockVel = Vector2.zero;
             Vector3 launchOrigin = transform.position;
             Vector3 target = gm.Player.transform.position;
-            Vector2 lockedAim = ((Vector2)(target - launchOrigin)).normalized;
-            if (lockedAim.sqrMagnitude < 0.001f) lockedAim = Vector2.right;
             float impactRadius = Mathf.Max(0.5f, Data.bossImpactRadius);
-            int n = Mathf.Max(6, Data.projectileCount);
+            float warningDuration = 0.85f;
+            if (!redThrow)
+            {
+                var balance = GameDatabase.Balance;
+                float chargeDuration = balance != null ? balance.bossMagicChargeDuration : 0.32f;
+                warningDuration = balance != null ? balance.bossMagicWarningDuration : 0.8f;
+                var charge = BossVfxAtlas.SpawnMagicCharge(transform, chargeDuration);
+                yield return new WaitForSeconds(Mathf.Max(0.05f, chargeDuration));
+                if (charge != null) charge.EndCharge();
+                if (_dead || GameManager.Instance == null || GameManager.Instance.Player == null)
+                {
+                    _bossCharging = false;
+                    yield break;
+                }
+                target = GameManager.Instance.Player.transform.position;
+            }
             var wpool = GamePools.Get("boss_warning", BossWarning.CreateGo);
             var wgo = wpool.Get(launchOrigin);
             var w = wgo.GetComponent<BossWarning>();
-            if (redThrow) w.ShowDirectional(launchOrigin, target, 1.8f, 0.85f, wpool);
-            else w.ShowRadial(launchOrigin, lockedAim, n, 0.85f, wpool);
+            if (redThrow) w.ShowDirectional(launchOrigin, target, 1.8f, warningDuration, wpool);
+            else w.ShowMagicArea(target, impactRadius, warningDuration, wpool);
 
-            yield return new WaitForSeconds(0.85f);
+            yield return new WaitForSeconds(warningDuration);
             _bossCharging = false;
 
             if (_dead || GameManager.Instance == null || GameManager.Instance.Player == null) yield break;
@@ -494,21 +594,19 @@ namespace RogueLike.Enemies
                 yield break;
             }
 
-            float baseA = Mathf.Atan2(lockedAim.y, lockedAim.x) * Mathf.Rad2Deg;
-            float dmg = Data.rangedDamage * DmgScale;
-            var pool = GamePools.Get("enemy_bullet", BuildEnemyBulletGo);
-            for (int i = 0; i < n; i++)
-            {
-                float a = baseA + 360f * i / n;
-                Vector2 d = new Vector2(Mathf.Cos(a * Mathf.Deg2Rad), Mathf.Sin(a * Mathf.Deg2Rad));
-                var go = pool.Get(launchOrigin);
-                var bulletRenderer = go.GetComponent<SpriteRenderer>();
-                if (bulletRenderer != null) bulletRenderer.color = Data.id == "boss2" ? new Color(0.8f, 0.45f, 1f) : new Color(1f, 0.35f, 0.35f);
-                var proj = go.GetComponent<Projectile>();
-                proj.Launch(launchOrigin, d, 1, dmg, Data.projectileSpeed,
-                    Data.bossAttackPattern == 1 ? 30f : 10f, 0, 0f, false, false, pool, null);
-                if (Data.bossAttackPattern == 1) proj.SetBossMagicVisual(true);
-            }
+            // 魔王的法术落在预警时锁定的地点，不生成任何普通弹丸。
+            BossVfxAtlas.SpawnMagicImpact(target, impactRadius * 2f);
+            var player = GameManager.Instance.Player;
+            var playerCollider = player.GetComponent<CircleCollider2D>();
+            Vector2 playerCenter = playerCollider != null
+                ? playerCollider.transform.TransformPoint(playerCollider.offset)
+                : player.transform.position;
+            float playerRadius = playerCollider != null
+                ? playerCollider.radius * Mathf.Max(playerCollider.transform.lossyScale.x, playerCollider.transform.lossyScale.y)
+                : 0.35f;
+            float hitDistance = impactRadius + playerRadius;
+            if (((Vector2)target - playerCenter).sqrMagnitude <= hitDistance * hitDistance)
+                player.Health.TakeDamage(new DamageInfo(Data.bossAttackDamage * DmgScale, gameObject));
         }
 
         public static GameObject BuildEnemyBulletGo()
@@ -517,15 +615,17 @@ namespace RogueLike.Enemies
             if (prefab != null)
             {
                 var prefabSr = prefab.GetComponent<SpriteRenderer>();
-                if (prefabSr != null && prefabSr.sprite == null)
-                    prefabSr.sprite = SpriteFactory.Circle(new Color(1f, 0.35f, 0.35f), 0.11f);
+                if (prefabSr != null)
+                    prefabSr.sprite = AssetLoader.LoadProjectileSprite("enemy_spore") ??
+                        SpriteFactory.Circle(new Color(1f, 0.35f, 0.35f), 0.11f);
                 return prefab;
             }
 
             var go = new GameObject("EnemyBullet");
             go.transform.SetParent(PoolRoot.Root);
             var sr = go.AddComponent<SpriteRenderer>();
-            sr.sprite = SpriteFactory.Circle(new Color(1f, 0.35f, 0.35f), 0.11f);
+            sr.sprite = AssetLoader.LoadProjectileSprite("enemy_spore") ??
+                SpriteFactory.Circle(new Color(1f, 0.35f, 0.35f), 0.11f);
             sr.sortingOrder = 3;
             var col = go.AddComponent<CircleCollider2D>();
             col.isTrigger = true;
@@ -535,6 +635,24 @@ namespace RogueLike.Enemies
             rb.isKinematic = true;
             go.AddComponent<Projectile>();
             return go;
+        }
+
+        private static void SetEnemyBulletArt(GameObject bullet, string spriteId, Color tint)
+        {
+            var renderer = bullet != null ? bullet.GetComponent<SpriteRenderer>() : null;
+            if (renderer == null) return;
+            renderer.sprite = AssetLoader.LoadProjectileSprite(spriteId) ??
+                AssetLoader.LoadProjectileSprite("enemy_spore") ?? renderer.sprite;
+            renderer.color = tint;
+        }
+
+        private void SetWhiteFlash(float amount)
+        {
+            if (_flashRenderer == null) return;
+            float alpha = Mathf.Clamp01(amount);
+            _flashRenderer.enabled = alpha > 0.001f;
+            if (_flashRenderer.enabled)
+                _flashRenderer.color = new Color(1f, 1f, 1f, alpha);
         }
     }
 }

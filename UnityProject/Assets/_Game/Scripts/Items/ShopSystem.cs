@@ -28,6 +28,8 @@ namespace RogueLike.Items
 
         private readonly List<ShopSlot> _slots = new List<ShopSlot>();
         private readonly List<DirectorChallengeOffer> _challengeOffers = new List<DirectorChallengeOffer>();
+        private readonly HashSet<string> _lastChallengeModifierIds = new HashSet<string>();
+        private readonly string[] _lastChallengeTierIds = new string[4];
         private readonly List<ShopSlot> _lockedForNextShop = new List<ShopSlot>();
         private int _wave;
         private int _rerolls;
@@ -99,6 +101,8 @@ namespace RogueLike.Items
             _shopRevision++;
             _slots.Clear();
             _challengeOffers.Clear();
+            _lastChallengeModifierIds.Clear();
+            for (int i = 0; i < _lastChallengeTierIds.Length; i++) _lastChallengeTierIds[i] = null;
             _lockedForNextShop.Clear();
             _previousShopKeys.Clear();
             _lastRollKeys.Clear();
@@ -120,15 +124,47 @@ namespace RogueLike.Items
             foreach (var entry in GameDatabase.DirectorChallengeModifiers.Values)
                 if (entry != null && entry.IsValid && entry.minWave <= _wave + 1)
                     eligible.Add(entry);
-            eligible.Sort((a, b) => string.CompareOrdinal(a.id, b.id));
             if (eligible.Count == 0) return;
-            int firstIndex = Random.Range(0, eligible.Count);
+            // Shuffle before prioritizing modules absent from the previous challenge shop.
+            // Each tier gets a distinct module whenever the catalog has at least four.
+            for (int i = eligible.Count - 1; i > 0; i--)
+            {
+                int swap = Random.Range(0, i + 1);
+                var temp = eligible[i];
+                eligible[i] = eligible[swap];
+                eligible[swap] = temp;
+            }
+            var prioritized = new List<DirectorChallengeData>(eligible.Count);
+            foreach (var candidate in eligible)
+                if (!_lastChallengeModifierIds.Contains(candidate.id)) prioritized.Add(candidate);
+            foreach (var candidate in eligible)
+                if (_lastChallengeModifierIds.Contains(candidate.id)) prioritized.Add(candidate);
+            var used = new HashSet<string>();
             for (int i = 0; i < 4; i++)
             {
                 var tier = balance.directorChallengeTiers[i];
                 if (tier == null) { _challengeOffers.Clear(); return; }
-                int index = (firstIndex + i) % eligible.Count;
-                _challengeOffers.Add(new DirectorChallengeOffer(eligible[index], tier, i));
+                DirectorChallengeData selected = null;
+                foreach (var candidate in prioritized)
+                    if (!used.Contains(candidate.id) && candidate.id != _lastChallengeTierIds[i])
+                    { selected = candidate; break; }
+                if (selected == null)
+                    foreach (var candidate in prioritized)
+                        if (!used.Contains(candidate.id)) { selected = candidate; break; }
+                if (selected == null) selected = prioritized[i % prioritized.Count];
+                used.Add(selected.id);
+                _challengeOffers.Add(new DirectorChallengeOffer(selected, tier, i));
+            }
+            RecordChallengeOfferHistory();
+        }
+
+        private void RecordChallengeOfferHistory()
+        {
+            _lastChallengeModifierIds.Clear();
+            foreach (var offer in _challengeOffers)
+            {
+                _lastChallengeModifierIds.Add(offer.Modifier.id);
+                _lastChallengeTierIds[offer.TierIndex] = offer.Modifier.id;
             }
         }
 
@@ -209,13 +245,14 @@ namespace RogueLike.Items
                         proposed.Add(new DirectorChallengeOffer(modifier,
                             GameDatabase.Balance.directorChallengeTiers[i], i, entry.title));
                     }
-                    if (seenModifiers.Count < Mathf.Min(2, allowed.Count))
+                    if (seenModifiers.Count < Mathf.Min(4, allowed.Count))
                     {
                         completed?.Invoke(false, "AI 挑战类型缺少变化，保留本地方案。");
                         return;
                     }
                     _challengeOffers.Clear();
                     _challengeOffers.AddRange(proposed);
+                    RecordChallengeOfferHistory();
                     completed?.Invoke(true, "AI 已改写四档挑战；可选择，或返回商店直接进入下一波。");
                 }));
         }

@@ -22,7 +22,8 @@ namespace RogueLike.Core
         public static event Action WeaponsChanged;
         public static event Action InventoryChanged;
         public static event Action<int, int, int> LevelChanged;  // (level, exp, expToNext)
-        public static event Action<int> LevelUp;                 // (newLevel)，升级瞬间广播（暂停游戏弹三选一）
+        public static event Action<int> LevelUp;                 // (newLevel)，升级瞬间广播，由流程中枢累计到波次结束
+        public static event Action<int> WaveEndUpgradeReady;     // (newLevel)，波次结束后展示强化卡
         public static event Action LevelUpChoiceApplied;         // 升级选择已应用，恢复游戏
         public static event Action<int, int> GameOverEvent;      // (wave, kills)
 
@@ -40,6 +41,7 @@ namespace RogueLike.Core
         public static void RaiseInventoryChanged() => InventoryChanged?.Invoke();
         public static void RaiseLevelChanged(int level, int exp, int expToNext) => LevelChanged?.Invoke(level, exp, expToNext);
         public static void RaiseLevelUp(int newLevel) => LevelUp?.Invoke(newLevel);
+        public static void RaiseWaveEndUpgradeReady(int newLevel) => WaveEndUpgradeReady?.Invoke(newLevel);
         public static void RaiseLevelUpChoiceApplied() => LevelUpChoiceApplied?.Invoke();
         public static void RaiseGameOver(int wave, int kills) => GameOverEvent?.Invoke(wave, kills);
     }

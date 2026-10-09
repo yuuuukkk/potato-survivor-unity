@@ -33,7 +33,7 @@
     "rarityPriceMult": [ 1, 1.8, 3.2, 5.5, 9, 16 ],
     "rarityUnlockWave": [ 1, 1, 4, 7, 10, 14 ],
     "shopLevelUpWave": 4,
-    "rarityWeights": [ 50, 30, 15, 4.5, 0.8 ],
+    "rarityWeights": [ 50, 30, 15, 4.5, 0.8, 0.1 ],
     "luckWeightBonus": 0.4,
     "shopTierChancePerWave": [ 0, 6, 2, 0.23, 0.12, 0.55 ],
     "shopTierFirstWave": [ 1, 2, 4, 8, 11, 12 ],

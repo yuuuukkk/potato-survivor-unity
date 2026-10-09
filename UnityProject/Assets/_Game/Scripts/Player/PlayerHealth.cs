@@ -19,26 +19,28 @@ namespace RogueLike.Player
         private float _regenAcc;
         private float _iframes;
         private bool _dead;
-        private SpriteRenderer _sprite;
+        private PlayerController _controller;
+        private SpriteRenderer _flashRenderer;
         private Color _restColor = Color.white;
+        private Color _hitColor;
         private float _hitFlashTimer;
 
         private void Awake()
         {
             _stats = GetComponent<PlayerStats>();
-            _sprite = GetComponent<SpriteRenderer>();
-            if (_sprite != null) _restColor = _sprite.color;
+            _controller = GetComponent<PlayerController>();
         }
 
         public void Setup(CharacterData character)
         {
+            RestoreHitColor();
+            _flashRenderer = ResolveVisualRenderer();
+            if (_flashRenderer != null) _restColor = _flashRenderer.color;
             RebuildMaxHp();
             CurrentHp = MaxHp;
             _dead = false;
             _iframes = 0f;
             _regenAcc = 0f;
-            _hitFlashTimer = 0f;
-            if (_sprite != null) _sprite.color = _restColor;
         }
 
         /// <summary>重新计算最大生命（升级/道具改变 MaxHp 后调用）。</summary>
@@ -73,15 +75,13 @@ namespace RogueLike.Player
             DamageNumber.Spawn(transform.position + Vector3.up * 0.75f, dmg, false,
                 new Color(1f, 0.36f, 0.36f));
             var balance = GameDatabase.Balance;
-            CameraShake.Shake(balance != null ? balance.playerHitShakeDuration : 0.17f,
+            float hitDuration = Mathf.Max(0f, balance != null ? balance.playerHitShakeDuration : 0.17f);
+            CameraShake.ShakePlayerHit(hitDuration,
                 balance != null ? balance.playerHitShakeMagnitude : 0.105f);
-            _hitFlashTimer = balance != null ? balance.playerHitFlashDuration : 0.22f;
-            if (_sprite != null) _sprite.color = balance != null ? balance.playerHitTint : new Color(1f, 0.38f, 0.38f);
+            StartHitFlash(hitDuration, balance != null ? balance.playerHitTint : new Color(1f, 0.18f, 0.18f, 1f));
             Vector2 away = info.source != null
                 ? (Vector2)(transform.position - info.source.transform.position) : Vector2.zero;
-            var controller = GetComponent<PlayerController>();
-            if (away.sqrMagnitude < 0.001f) away = controller != null ? -controller.Facing : Vector2.left;
-            if (controller != null) controller.ApplyHitRecoil(away, balance != null ? balance.playerHitRecoilSpeed : 2.6f);
+            if (away.sqrMagnitude < 0.001f) away = _controller != null ? -_controller.Facing : Vector2.left;
             HitImpact.Spawn(transform.position + Vector3.up * 0.2f, away, false, true);
             CombatAudio.PlayPlayerHit();
 
@@ -95,11 +95,6 @@ namespace RogueLike.Player
 
         private void Update()
         {
-            if (_hitFlashTimer > 0f)
-            {
-                _hitFlashTimer -= Time.deltaTime;
-                if (_hitFlashTimer <= 0f && _sprite != null) _sprite.color = _restColor;
-            }
             if (_dead) return;
             if (_iframes > 0f) _iframes -= Time.deltaTime;
 
@@ -113,6 +108,55 @@ namespace RogueLike.Player
                     Heal(1f);
                 }
             }
+        }
+
+        private SpriteRenderer ResolveVisualRenderer()
+        {
+            if (_controller == null) _controller = GetComponent<PlayerController>();
+            return _controller != null && _controller.VisualRenderer != null
+                ? _controller.VisualRenderer : GetComponent<SpriteRenderer>();
+        }
+
+        private void StartHitFlash(float duration, Color tint)
+        {
+            var renderer = ResolveVisualRenderer();
+            if (renderer != _flashRenderer)
+            {
+                RestoreHitColor();
+                _flashRenderer = renderer;
+                if (renderer != null) _restColor = renderer.color;
+            }
+            if (renderer == null || duration <= 0f)
+            {
+                RestoreHitColor();
+                return;
+            }
+
+            _hitFlashTimer = duration;
+            _hitColor = new Color(tint.r, tint.g, tint.b, _restColor.a);
+            renderer.color = _hitColor;
+        }
+
+        private void LateUpdate()
+        {
+            if (_hitFlashTimer <= 0f || _flashRenderer == null) return;
+            _hitFlashTimer -= Time.deltaTime;
+            if (_hitFlashTimer <= 0f)
+                RestoreHitColor();
+            else
+                _flashRenderer.color = _hitColor;
+        }
+
+        private void OnDisable()
+        {
+            RestoreHitColor();
+        }
+
+        private void RestoreHitColor()
+        {
+            if (_hitFlashTimer > 0f && _flashRenderer != null)
+                _flashRenderer.color = _restColor;
+            _hitFlashTimer = 0f;
         }
     }
 }

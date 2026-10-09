@@ -101,6 +101,22 @@ namespace RogueLike.Enemies
             }
         }
 
+        public void ShowMagicArea(Vector3 center, float radius, float duration, ObjectPool pool)
+        {
+            Prepare(duration, pool, false, new Color(0.72f, 0.35f, 1f));
+            radius = Mathf.Max(0.5f, radius);
+            var ring = new Vector3[33];
+            for (int i = 0; i < ring.Length; i++)
+            {
+                float angle = Mathf.PI * 2f * i / (ring.Length - 1);
+                ring[i] = center + new Vector3(Mathf.Cos(angle), Mathf.Sin(angle)) * radius;
+            }
+            SetPath(0, 0.07f, ring);
+            float cross = radius * 0.45f;
+            SetPath(1, 0.045f, center + Vector3.left * cross, center + Vector3.right * cross);
+            SetPath(2, 0.045f, center + Vector3.down * cross, center + Vector3.up * cross);
+        }
+
         private void SetPath(int index, float width, params Vector3[] points)
         {
             var line = EnsureLine(index);

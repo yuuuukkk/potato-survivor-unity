@@ -17,11 +17,13 @@ namespace RogueLike.Combat
         public float Cooldown { get; set; }
         public int PaidValue { get; private set; }
         private readonly List<string> _modificationIds = new List<string>();
+        private readonly List<string> _branchIds = new List<string>();
         private readonly Dictionary<string, int> _modificationLevels = new Dictionary<string, int>();
         public IReadOnlyList<string> ModificationIds => _modificationIds;
+        public IReadOnlyList<string> BranchIds => _branchIds;
         public int ModificationLevel(string id) => _modificationLevels.TryGetValue(id, out var level) ? level : 0;
-        public int MaxModificationSlots => GameDatabase.Balance != null && GameDatabase.Balance.maxEquippedModifications > 0
-            ? GameDatabase.Balance.maxEquippedModifications : 2;
+        // Weapon tier directly determines the number of independent build slots.
+        public int MaxModificationSlots => Mathf.Max(1, Level);
         public MeleeAnimationStyle EffectiveMeleeAnimation { get; private set; }
         public WeaponModificationData MeleeWaveModification { get; private set; }
         public int ProjectileBounces { get; private set; }
@@ -37,6 +39,23 @@ namespace RogueLike.Combat
         public float CollectionRadius { get; private set; }
         public float ReturnBonusPerPickup { get; private set; }
         public int MaxPickupBonusCount { get; private set; }
+        public float HonkChance { get; private set; }
+        public float HonkRadius { get; private set; }
+        public float HonkDuration { get; private set; }
+        public float HonkMoveMultiplier { get; private set; } = 1f;
+        public Color HonkTint { get; private set; } = Color.white;
+        public float HealthPackChance { get; private set; }
+        public float HealthPackHeal { get; private set; }
+        public int GrowthKills { get; private set; }
+        public bool HasGrowthBuild => _growthModification != null;
+        public int GrowthKillsPerStack => _growthModification != null
+            ? Mathf.Max(1, _growthModification.killsPerGrowthStack) : 0;
+        public int GrowthMaxStacks => _growthModification != null
+            ? Mathf.Max(1, _growthModification.growthMaxStacks) : 0;
+        public int GrowthStacks => _growthModification != null ? Mathf.Min(_growthModification.growthMaxStacks,
+            GrowthKills / Mathf.Max(1, _growthModification.killsPerGrowthStack)) : 0;
+        private WeaponModificationData _growthModification;
+        private int _growthModificationLevel;
         public int VacuumAbsorbLimit { get; private set; }
         public float VacuumDamagePerAbsorb { get; private set; }
         public float VacuumRadius { get; private set; }
@@ -77,14 +96,27 @@ namespace RogueLike.Combat
             return false;
         }
 
-        public bool HasModification(string id) => !string.IsNullOrWhiteSpace(id) && _modificationIds.Contains(id);
+        public bool HasModification(string id) => !string.IsNullOrWhiteSpace(id) &&
+            (_modificationIds.Contains(id) || _branchIds.Contains(id));
+
+        public string SelectedBranchId(string parentId)
+        {
+            foreach (var id in _branchIds)
+            {
+                var branch = GameDatabase.GetWeaponModification(id);
+                if (branch != null && branch.parentId == parentId) return id;
+            }
+            return null;
+        }
 
         /// <summary>只替换该分支的装备；其余独立分支保持不变。</summary>
         public bool SetModificationForGroup(WeaponModificationData modification, int level = 1)
         {
-            if (modification == null || !modification.AppliesTo(Data) || !modification.IsValid) return false;
+            if (modification == null || modification.IsBranch || !modification.AppliesTo(Data) || !modification.IsValid) return false;
             var retained = new List<WeaponModificationData>();
             var retainedLevels = new List<int>();
+            var retainedBranches = new List<WeaponModificationData>();
+            var branchLevels = new List<int>();
             foreach (var id in _modificationIds)
             {
                 var old = GameDatabase.GetWeaponModification(id);
@@ -94,10 +126,49 @@ namespace RogueLike.Combat
                     retainedLevels.Add(ModificationLevel(id));
                 }
             }
+            foreach (var id in _branchIds)
+            {
+                var branch = GameDatabase.GetWeaponModification(id);
+                if (branch != null && retained.Exists(root => root.id == branch.parentId))
+                {
+                    retainedBranches.Add(branch);
+                    branchLevels.Add(ModificationLevel(id));
+                }
+            }
             if (retained.Count >= MaxModificationSlots) return false;
             ResetModifications();
             for (int i = 0; i < retained.Count; i++) ApplyModification(retained[i], retainedLevels[i]);
+            for (int i = 0; i < retainedBranches.Count; i++) ApplyBranch(retainedBranches[i], branchLevels[i]);
             return ApplyModification(modification, level);
+        }
+
+        /// <summary>A branch replaces another branch of the same base; it never consumes a weapon slot.</summary>
+        public bool SetBranch(WeaponModificationData branch, int level)
+        {
+            if (branch == null || !branch.IsBranch || !_modificationIds.Contains(branch.parentId) ||
+                !branch.AppliesTo(Data) || !branch.IsValid) return false;
+            var roots = new List<WeaponModificationData>();
+            var rootLevels = new List<int>();
+            var branches = new List<WeaponModificationData>();
+            var branchLevels = new List<int>();
+            foreach (var id in _modificationIds)
+            {
+                var root = GameDatabase.GetWeaponModification(id);
+                if (root == null) continue;
+                roots.Add(root);
+                rootLevels.Add(ModificationLevel(id));
+            }
+            foreach (var id in _branchIds)
+            {
+                var old = GameDatabase.GetWeaponModification(id);
+                if (old == null || old.parentId == branch.parentId) continue;
+                branches.Add(old);
+                branchLevels.Add(ModificationLevel(id));
+            }
+            ResetModifications();
+            for (int i = 0; i < roots.Count; i++) ApplyModification(roots[i], rootLevels[i]);
+            for (int i = 0; i < branches.Count; i++) ApplyBranch(branches[i], branchLevels[i]);
+            return ApplyBranch(branch, level);
         }
 
         public bool RemoveModification(string id)
@@ -105,6 +176,8 @@ namespace RogueLike.Combat
             if (!HasModification(id)) return false;
             var retained = new List<WeaponModificationData>();
             var levels = new List<int>();
+            var retainedBranches = new List<WeaponModificationData>();
+            var branchLevels = new List<int>();
             foreach (var existing in _modificationIds)
             {
                 if (existing == id) continue;
@@ -113,26 +186,42 @@ namespace RogueLike.Combat
                 retained.Add(mod);
                 levels.Add(ModificationLevel(existing));
             }
+            foreach (var existing in _branchIds)
+            {
+                if (existing == id) continue;
+                var branch = GameDatabase.GetWeaponModification(existing);
+                if (branch == null || !retained.Exists(root => root.id == branch.parentId)) continue;
+                retainedBranches.Add(branch);
+                branchLevels.Add(ModificationLevel(existing));
+            }
             ResetModifications();
             for (int i = 0; i < retained.Count; i++) ApplyModification(retained[i], levels[i]);
+            for (int i = 0; i < retainedBranches.Count; i++) ApplyBranch(retainedBranches[i], branchLevels[i]);
             return true;
         }
 
         public void RefreshModificationLevels(System.Func<string, int> getLevel)
         {
             var mods = new List<WeaponModificationData>();
+            var branches = new List<WeaponModificationData>();
             foreach (var id in _modificationIds)
             {
                 var mod = GameDatabase.GetWeaponModification(id);
                 if (mod != null) mods.Add(mod);
             }
+            foreach (var id in _branchIds)
+            {
+                var branch = GameDatabase.GetWeaponModification(id);
+                if (branch != null) branches.Add(branch);
+            }
             ResetModifications();
             foreach (var mod in mods) ApplyModification(mod, getLevel(mod.id));
+            foreach (var branch in branches) ApplyBranch(branch, getLevel(branch.id));
         }
 
         public bool ClearModifications()
         {
-            if (_modificationIds.Count == 0) return false;
+            if (_modificationIds.Count == 0 && _branchIds.Count == 0) return false;
             ResetModifications();
             return true;
         }
@@ -140,6 +229,7 @@ namespace RogueLike.Combat
         private void ResetModifications()
         {
             _modificationIds.Clear();
+            _branchIds.Clear();
             _modificationLevels.Clear();
             EffectiveMeleeAnimation = Data.meleeAnimation;
             MeleeWaveModification = null;
@@ -156,6 +246,15 @@ namespace RogueLike.Combat
             CollectionRadius = 0f;
             ReturnBonusPerPickup = 0f;
             MaxPickupBonusCount = 0;
+            HonkChance = 0f;
+            HonkRadius = 0f;
+            HonkDuration = 0f;
+            HonkMoveMultiplier = 1f;
+            HonkTint = Color.white;
+            HealthPackChance = 0f;
+            HealthPackHeal = 0f;
+            _growthModification = null;
+            _growthModificationLevel = 0;
             VacuumAbsorbLimit = 0;
             VacuumDamagePerAbsorb = 0f;
             VacuumRadius = 0f;
@@ -168,10 +267,23 @@ namespace RogueLike.Combat
 
         public bool ApplyModification(WeaponModificationData modification, int level = 1)
         {
-            if (modification == null || !modification.IsValid ||
+            if (modification == null || modification.IsBranch || !modification.IsValid ||
                 !modification.AppliesTo(Data) || _modificationIds.Contains(modification.id) ||
                 HasModificationGroup(modification.exclusiveGroup) ||
                 _modificationIds.Count >= MaxModificationSlots) return false;
+            return ApplyModificationEffects(modification, level, false);
+        }
+
+        private bool ApplyBranch(WeaponModificationData branch, int level)
+        {
+            if (branch == null || !branch.IsBranch || !branch.IsValid ||
+                !branch.AppliesTo(Data) || !_modificationIds.Contains(branch.parentId) ||
+                SelectedBranchId(branch.parentId) != null) return false;
+            return ApplyModificationEffects(branch, level, true);
+        }
+
+        private bool ApplyModificationEffects(WeaponModificationData modification, int level, bool branch)
+        {
             level = Mathf.Clamp(level, 1, modification.MaxLevel);
             int upgrades = level - 1;
 
@@ -189,7 +301,7 @@ namespace RogueLike.Combat
                     if (Data.kind != WeaponKind.Projectile ||
                         Data.attackPattern != WeaponAttackPattern.StandardProjectile) return false;
                     ProjectileBounces += Mathf.Clamp(modification.extraBounces +
-                        Mathf.RoundToInt(upgrades * modification.extraBouncesPerLevel), 1, 8);
+                        Mathf.RoundToInt(upgrades * modification.extraBouncesPerLevel), branch ? 0 : 1, 8);
                     BounceDamageMultiplier *= Mathf.Clamp(modification.bounceDamageMultiplier, 0.1f, 1f);
                     ProjectileRangeMultiplier *= Mathf.Max(1f, modification.projectileRangeMultiplier);
                     break;
@@ -226,6 +338,26 @@ namespace RogueLike.Combat
                         upgrades * modification.returnBonusPerPickupPerLevel);
                     MaxPickupBonusCount = Mathf.Clamp(modification.maxPickupBonusCount, 1, 32);
                     break;
+                case WeaponModificationKind.HonkProjectile:
+                    if (Data.kind != WeaponKind.Projectile || Data.explodeRadius > 0f ||
+                        Data.attackPattern != WeaponAttackPattern.StandardProjectile) return false;
+                    float chance = Mathf.Clamp01(modification.honkChance +
+                        upgrades * modification.honkChancePerLevel);
+                    HonkChance = 1f - (1f - HonkChance) * (1f - chance);
+                    HonkRadius = Mathf.Max(HonkRadius, modification.honkRadius);
+                    HonkDuration = Mathf.Max(HonkDuration, modification.honkDuration);
+                    HonkMoveMultiplier = Mathf.Min(HonkMoveMultiplier, Mathf.Clamp(modification.honkMoveMultiplier, 0.1f, 1f));
+                    HonkTint = modification.honkTint;
+                    break;
+                case WeaponModificationKind.BloodPackOnKill:
+                    HealthPackChance = Mathf.Clamp01(modification.healthPackChance +
+                        upgrades * modification.healthPackChancePerLevel);
+                    HealthPackHeal = Mathf.Max(1f, modification.healthPackHeal);
+                    break;
+                case WeaponModificationKind.KillGrowth:
+                    _growthModification = modification;
+                    _growthModificationLevel = level;
+                    break;
                 case WeaponModificationKind.VacuumRocket:
                     if (Data.kind != WeaponKind.Projectile || Data.explodeRadius <= 0f ||
                         Data.attackPattern != WeaponAttackPattern.StandardProjectile) return false;
@@ -250,7 +382,8 @@ namespace RogueLike.Combat
                 (1f + upgrades * Mathf.Max(0f, modification.damageBonusPerLevel));
             _intervalMultiplier *= modification.attackIntervalMultiplier > 0f
                 ? Mathf.Clamp(modification.attackIntervalMultiplier, 0.5f, 2f) : 1f;
-            _modificationIds.Add(modification.id);
+            if (branch) _branchIds.Add(modification.id);
+            else _modificationIds.Add(modification.id);
             _modificationLevels[modification.id] = level;
             return true;
         }
@@ -261,7 +394,18 @@ namespace RogueLike.Combat
             float g = cfg != null ? cfg.upgradeDamagePerLevel : 0.5f;
             float specialist = Data.kind == WeaponKind.Projectile && stats.Character != null
                 ? Mathf.Max(0f, stats.Character.projectileDamageMultiplier) : 1f;
-            return Data.damage * (1f + g * (Level - 1)) * stats.Get(StatType.DamageMult) * specialist * _damageMultiplier;
+            float growth = _growthModification != null
+                ? 1f + GrowthStacks * Mathf.Max(0f, _growthModification.growthDamagePerStack +
+                    (_growthModificationLevel - 1) * _growthModification.growthDamagePerStackPerLevel) : 1f;
+            return Data.damage * (1f + g * (Level - 1)) * stats.Get(StatType.DamageMult) * specialist * _damageMultiplier * growth;
+        }
+
+        public bool RegisterKill()
+        {
+            if (_growthModification == null || GrowthStacks >= _growthModification.growthMaxStacks) return false;
+            int previous = GrowthStacks;
+            GrowthKills++;
+            return GrowthStacks > previous;
         }
 
         public float EffectiveInterval(PlayerStats stats)
@@ -353,6 +497,7 @@ namespace RogueLike.Combat
             var proj = go.GetComponent<Projectile>();
             proj.Launch(origin, aim.normalized, 0, damage, Data.projectileSpeed,
                 EffectiveRange(stats) * 2f, 0, 0f, crit, true, pool, stats);
+            proj.SetSourceWeapon(this);
             proj.ConfigureBoomerangReturn(ReturnDamageMultiplier, ReturnSpeedMultiplier);
             proj.ConfigureBoomerangCollection(CollectionRadius, ReturnBonusPerPickup, MaxPickupBonusCount);
         }

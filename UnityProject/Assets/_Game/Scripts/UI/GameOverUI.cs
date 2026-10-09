@@ -70,5 +70,6 @@ namespace RogueLike.UI
         }
 
         private void Hide() => _panel.gameObject.SetActive(false);
+
     }
 }

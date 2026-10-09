@@ -14,6 +14,7 @@ namespace RogueLike.Core
     /// 可调字段：竞技场尺寸 / 相机 / 跳过主菜单 / 起始波次 / 默认角色；
     /// 场景有 GameConfig（挂在 GameManager 上）时以其为准（Inspector 集中配置）。
     /// </summary>
+    [DefaultExecutionOrder(1000)]
     public class GameBootstrap : MonoBehaviour
     {
         public static GameBootstrap Instance { get; private set; }
@@ -172,9 +173,10 @@ namespace RogueLike.Core
                 sr.sprite = SpriteFactory.Square(arenaSize.x, arenaSize.y);
                 sr.color = new Color(0.10f, 0.10f, 0.16f);
             }
-            else if (!sceneAuthored || createdBg)
+            else if (!sceneAuthored || createdBg || bg.transform.localScale == Vector3.one)
             {
-                // 只自动适配运行时创建的背景；场景中的背景尺寸由 Inspector 决定。
+                // 运行时生成或仍为默认尺寸的场景背景按场地宽度适配。
+                // 非默认缩放视为用户在场景中手工设置，保留 Inspector 的布局。
                 var b = sr.sprite.bounds;
                 float baseW = arenaSize.x;
                 float scale = baseW / Mathf.Max(b.size.x, 0.001f);
@@ -245,15 +247,12 @@ namespace RogueLike.Core
                     canvasGo.AddComponent<MainMenuUI>();
                     canvasGo.AddComponent<ShopUI>();
                     canvasGo.AddComponent<GameOverUI>();
-                    canvasGo.AddComponent<InventoryBarUI>();
                     canvasGo.AddComponent<LevelUpUI>();
                     canvasGo.AddComponent<TooltipUI>();
                     canvasGo.AddComponent<StatsPanelUI>();
                 }
             }
 
-            if (UIFactory.MainCanvas != null && UIFactory.MainCanvas.GetComponent<UIResponsiveScaler>() == null)
-                UIFactory.MainCanvas.gameObject.AddComponent<UIResponsiveScaler>();
             UIFactory.ApplyThemeToExistingUI(UIFactory.MainCanvas);
             if (UIFactory.MainCanvas != null && UIFactory.MainCanvas.GetComponent<MobileControlsUI>() == null)
                 UIFactory.MainCanvas.gameObject.AddComponent<MobileControlsUI>();

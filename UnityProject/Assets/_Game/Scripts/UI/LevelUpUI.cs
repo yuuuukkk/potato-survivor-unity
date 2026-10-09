@@ -10,9 +10,7 @@ using UnityEngine.UI;
 namespace RogueLike.UI
 {
     /// <summary>
-    /// 升级四选一：从不同的属性提升中选择一项，武器与道具由商店构筑。
-    /// 升级队列：面板显示中收到的新升级会排队（同等级去重），选完自动弹下一个——保证任何情况下
-    /// 同一时刻只有一个升级界面、同一等级绝不弹两次；真正的连续升级（Lv.4→Lv.5）仍会依次弹出。
+    /// 波次结束后的四选一强化卡；波内获得的等级会在结算阶段逐级发放。
     /// </summary>
     public class LevelUpUI : MonoBehaviour
     {
@@ -21,11 +19,10 @@ namespace RogueLike.UI
 
         [SerializeField] private RectTransform _panel;
         [SerializeField] private Text _titleText;
+        [SerializeField] private Text _subtitleText;
         [SerializeField] private RectTransform _grid;
 
         private List<UpgradeOption> _options = new List<UpgradeOption>();
-        private int _lastHandledLevel = -1;
-        private readonly List<int> _pendingLevels = new List<int>();
 
         private void Awake()
         {
@@ -39,70 +36,42 @@ namespace RogueLike.UI
 
             // 优先使用预制体里的面板/标题/网格；无预制体时回退代码创建
             if (_panel == null) Build();
-            _panel.anchoredPosition = new Vector2(-170f, 0f);
-            _panel.sizeDelta = new Vector2(900f, 500f);
-            _grid.anchoredPosition = new Vector2(0f, -25f);
-            _titleText.rectTransform.anchoredPosition = new Vector2(0f, 195f);
-            _titleText.rectTransform.sizeDelta = new Vector2(820f, 44f);
-            EventBus.LevelUp += OnLevelUp;
-            EventBus.RunStarted += OnRunStarted;
+            if (_subtitleText != null) _subtitleText.gameObject.SetActive(false);
+            EventBus.WaveEndUpgradeReady += OnWaveEndUpgradeReady;
             Hide();
         }
 
         private void OnDestroy()
         {
             if (Instance == this) Instance = null;
-            EventBus.LevelUp -= OnLevelUp;
-            EventBus.RunStarted -= OnRunStarted;
-        }
-
-        /// <summary>新一局开始：清除防重标记与队列（等级重新从 1 累计）。</summary>
-        private void OnRunStarted(CharacterData character)
-        {
-            _lastHandledLevel = -1;
-            _pendingLevels.Clear();
+            EventBus.WaveEndUpgradeReady -= OnWaveEndUpgradeReady;
         }
 
         private void Build()
         {
             _panel = (RectTransform)UIFactory.CreateImage(transform,
-                new Color(0.06f, 0.06f, 0.10f, 0.97f), Vector2.zero, new Vector2(960f, 460f)).rectTransform;
+                new Color(0.06f, 0.06f, 0.10f, 0.97f), new Vector2(-150f, 0f), new Vector2(920f, 560f)).rectTransform;
 
             _titleText = UIFactory.CreateText(_panel, "升级！选择一项强化", 32, Color.white,
-                new Vector2(0f, 180f), new Vector2(700f, 44f));
-
+                new Vector2(0f, 190f), new Vector2(800f, 44f));
             var gridGo = new GameObject("UpgradeGrid");
             _grid = gridGo.AddComponent<RectTransform>();
             _grid.SetParent(_panel, false);
-            _grid.anchoredPosition = new Vector2(0f, 20f);
+            _grid.anchoredPosition = new Vector2(0f, -18f);
             _grid.sizeDelta = new Vector2(880f, 320f);
         }
 
         private void Hide() => _panel.gameObject.SetActive(false);
 
-        private void OnLevelUp(int level)
+        private void OnWaveEndUpgradeReady(int level)
         {
-            // 面板正在显示（上一次升级还没选完）：不重复弹窗，把新升级排队
-            if (_panel.gameObject.activeSelf)
-            {
-                if (!_pendingLevels.Contains(level)) _pendingLevels.Add(level);
-                return;
-            }
-
-            // 过期/重复等级（已被处理过）：忽略
-            if (level <= _lastHandledLevel)
-            {
-                return;
-            }
-
             ShowLevelUp(level);
         }
 
         private void ShowLevelUp(int level)
         {
-            _lastHandledLevel = level;
-
-            _titleText.text = $"升级！Lv.{level} 选择一项强化";
+            int wave = GameManager.Instance != null ? GameManager.Instance.Wave : 1;
+            _titleText.text = $"第 {wave} 波结束  ·  选择等级 {level} 强化";
             _options = UpgradeRoller.Roll(4);
 
             for (int i = _grid.childCount - 1; i >= 0; i--)
@@ -118,41 +87,86 @@ namespace RogueLike.UI
 
         private void CreateCard(int index, UpgradeOption opt)
         {
-            float x = -330f + index * 220f;
+            float x = -285f + index * 190f;
             Color rc = RarityInfo.Color(opt.Rarity);
+            var cardImage = UIFactory.CreateCard(_grid, Color.white,
+                new Vector2(x, 0f), new Vector2(190f, 300f));
+            // The frame remains the same art for every tier; only the card face carries rarity.
+            cardImage.color = Color.white;
+            var card = cardImage.rectTransform;
+            var rarityFill = UIFactory.CreateImage(card,
+                new Color(rc.r, rc.g, rc.b, 1f),
+                Vector2.zero, new Vector2(162f, 258f));
+            rarityFill.name = "RarityFill";
+            rarityFill.sprite = null;
+            rarityFill.type = Image.Type.Simple;
+            rarityFill.raycastTarget = false;
+            var accent = UIFactory.CreateImage(card, rc, new Vector2(0f, 143f), new Vector2(172f, 5f));
+            accent.sprite = null;
+            accent.type = Image.Type.Simple;
 
-            // 稀有度色边框（外框 + 内层暗底）
-            var frame = (RectTransform)UIFactory.CreateImage(_grid, rc, new Vector2(x, 0f), new Vector2(208f, 300f)).rectTransform;
-            var inner = (RectTransform)UIFactory.CreateImage(frame,
-                rc * 0.12f + new Color(0.10f, 0.10f, 0.14f), Vector2.zero, new Vector2(198f, 288f)).rectTransform;
-
-            string kindTag = opt.Kind == UpgradeKind.Stat ? "属性提升"
-                : opt.Kind == UpgradeKind.Weapon ? "新武器"
-                : "新道具";
-            UIFactory.CreateText(inner, kindTag, 14, rc, new Vector2(0f, 120f), new Vector2(186f, 22f));
-            Color titleColor = Color.white;
+            string kindTag = RarityName(opt.Rarity);
+            if (opt.Kind == UpgradeKind.Weapon) kindTag += " · 武器";
+            else if (opt.Kind == UpgradeKind.Item) kindTag += " · 道具";
+            bool lightFace = opt.Rarity == Rarity.Common || opt.Rarity == Rarity.Uncommon || opt.Rarity == Rarity.Legendary;
+            Color copyColor = lightFace ? new Color(0.13f, 0.10f, 0.10f) : Color.white;
+            UIFactory.CreateText(card, $"{index + 1:00}   {kindTag}", 16, copyColor,
+                new Vector2(0f, 116f), new Vector2(180f, 28f));
+            Color titleColor = copyColor;
             if (opt.Kind == UpgradeKind.Stat && opt.Mod != null)
                 titleColor = opt.Mod.flat < 0f || opt.Mod.percent < 0f
-                    ? new Color(1f, 0.43f, 0.43f) : new Color(0.46f, 0.95f, 0.54f);
-            UIFactory.CreateText(inner, opt.Title, 19, titleColor, new Vector2(0f, 84f), new Vector2(184f, 42f));
+                    ? (lightFace ? new Color(0.62f, 0.07f, 0.07f) : new Color(1f, 0.83f, 0.83f))
+                    : (lightFace ? new Color(0.06f, 0.30f, 0.09f) : new Color(0.79f, 1f, 0.80f));
+            if (opt.Kind == UpgradeKind.Stat)
+            {
+                string title = opt.Title ?? "";
+                int split = title.LastIndexOf(' ');
+                string name = split > 0 ? title.Substring(0, split) : title;
+                string amount = split > 0 ? title.Substring(split + 1) : "提升";
+                UIFactory.CreateText(card, name, 19, copyColor,
+                    new Vector2(0f, 60f), new Vector2(184f, 32f));
+                UIFactory.CreateText(card, amount, 30, titleColor,
+                    new Vector2(0f, -2f), new Vector2(184f, 56f));
+            }
+            else
+            {
+                UIFactory.CreateText(card, opt.Title, 21, titleColor,
+                    new Vector2(0f, 75f), new Vector2(184f, 38f));
+            }
             var icon = opt.Kind == UpgradeKind.Weapon && opt.Weapon != null
                 ? AssetLoader.LoadWeaponSprite(opt.Weapon.id)
                 : opt.Kind == UpgradeKind.Item && opt.Item != null
                     ? AssetLoader.LoadItemSprite(opt.Item.IconId) : null;
             if (icon != null)
             {
-                var art = UIFactory.CreateImage(inner, Color.white, new Vector2(0f, 32f), new Vector2(56f, 56f));
+                var art = UIFactory.CreateImage(card, Color.white, new Vector2(0f, 12f), new Vector2(74f, 74f));
                 art.sprite = icon;
                 art.type = Image.Type.Simple;
                 art.preserveAspect = true;
             }
-            UIFactory.CreateText(inner, opt.Description, 15, new Color(0.9f, 0.88f, 0.85f),
-                icon != null ? new Vector2(0f, -39f) : new Vector2(0f, 17f),
-                icon != null ? new Vector2(182f, 62f) : new Vector2(182f, 90f));
+            if (opt.Kind != UpgradeKind.Stat)
+            {
+                var detail = UIFactory.CreateText(card, opt.Description, 15,
+                    copyColor, new Vector2(0f, -62f), new Vector2(180f, 58f));
+                detail.verticalOverflow = VerticalWrapMode.Truncate;
+            }
 
-            var btn = UIFactory.CreateButton(inner, "选择", () => Apply(opt),
-                new Vector2(0f, -110f), new Vector2(150f, 40f), 16);
+            var btn = UIFactory.CreateButton(card, "选择", () => Apply(opt),
+                new Vector2(0f, -115f), new Vector2(158f, 42f), 18);
             btn.GetComponentInChildren<Text>().color = UIFactory.ButtonTextColor;
+        }
+
+        private static string RarityName(Rarity rarity)
+        {
+            switch (rarity)
+            {
+                case Rarity.Uncommon: return "优秀";
+                case Rarity.Rare: return "稀有";
+                case Rarity.Epic: return "史诗";
+                case Rarity.Legendary: return "传说";
+                case Rarity.Red: return "红色";
+                default: return "普通";
+            }
         }
 
         private void Apply(UpgradeOption opt)
@@ -180,21 +194,7 @@ namespace RogueLike.UI
             }
 
             Hide();
-            EventBus.RaiseLevelUpChoiceApplied(); // GameManager 恢复 timeScale=1 与 Playing
-
-            // 处理排队中的下一次升级（真连续升级：选完自动弹下一个并重新暂停）
-            if (_pendingLevels.Count > 0)
-            {
-                _pendingLevels.Sort();
-                int next = _pendingLevels[0];
-                _pendingLevels.RemoveAt(0);
-                if (next > _lastHandledLevel)
-                {
-                    ShowLevelUp(next);
-                    Time.timeScale = 0f;
-                    if (GameManager.Instance != null) GameManager.Instance.SetState(GameState.LevelUp);
-                }
-            }
+            EventBus.RaiseLevelUpChoiceApplied();
         }
     }
 }

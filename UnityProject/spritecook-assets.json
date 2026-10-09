@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "assets": [
+    { "label": "weapon_sword", "asset_id": "64ea51ef-c736-4950-828f-ad9d13d19b60", "sha12": "192c4287c260" },
+    { "label": "weapon_fist", "asset_id": "6b5dbd60-19ab-4e2d-9861-687993ed2dee", "sha12": "6de4c5117e8c" },
+    { "label": "weapon_boomerang", "asset_id": "86006c0f-962b-4a74-88f3-89de7302878a", "sha12": "0f4e1e17a8c4" },
+    { "label": "weapon_drone", "asset_id": "f6ece072-45d4-481a-b9db-ac8610060aa9", "sha12": "2ff097e6dc2d" },
+    { "label": "weapon_minigun", "asset_id": "41f5b809-42b0-49cb-93d3-3e07d917b4f7", "sha12": "d0bee359ce70" },
+    { "label": "weapon_flamethrower", "asset_id": "1c839628-99d1-4769-9e0d-51e18b6e5b0f", "sha12": "15e867ee8c83" },
+    { "label": "projectile_pistol", "asset_id": "457218d8-3871-443d-995a-e2af1582a5ad", "sha12": "835ca37bc1bd" },
+    { "label": "projectile_smg", "asset_id": "acd2faee-0d52-407f-b7b6-9993216e5a18", "sha12": "fcfa301104a2" },
+    { "label": "projectile_shotgun", "asset_id": "d0f873b5-9490-47e5-9e76-5e96f60313f6", "sha12": "63e2d11e5f83" },
+    { "label": "projectile_sniper", "asset_id": "d5467a55-72d7-437c-951b-8a9ef709bc36", "sha12": "b21ef3b46342" },
+    { "label": "projectile_laser", "asset_id": "d1e1bd47-3d2b-4d14-9d47-fd087a0cf1f0", "sha12": "4c2160ffe853" },
+    { "label": "projectile_rocket", "asset_id": "16e272d9-4d7f-4bec-ba7e-03ad570cb162", "sha12": "acd12c8e90db" },
+    { "label": "projectile_sword", "asset_id": "40bee36a-4246-4ed7-b580-979850f4884d", "sha12": "98ae045d290d" },
+    { "label": "projectile_fist", "asset_id": "0d68ff96-d5fd-4220-97f8-2355fb9c9377", "sha12": "866df654887b" },
+    { "label": "projectile_boomerang", "asset_id": "87e1384c-2080-469e-9300-f136d48270ea", "sha12": "a5e8a06f45fe" },
+    { "label": "projectile_drone", "asset_id": "3c37c996-f0be-47a7-9d14-d2d428fe5c94", "sha12": "0f0eabe4bcd0" },
+    { "label": "projectile_minigun", "asset_id": "c68bc0b7-a042-4e16-895f-3cab165f1f22", "sha12": "071d6b6b14dd" },
+    { "label": "projectile_flamethrower", "asset_id": "027a3f3e-6ca4-424c-8ed8-f5eb295b3e5b", "sha12": "4e7e46c651b9" },
+    { "label": "map_arena", "asset_id": "0c3cd7ff-7e76-40bb-b00c-f26ab34c07a3", "sha12": "af8318cdaa62" }
+  ]
+}

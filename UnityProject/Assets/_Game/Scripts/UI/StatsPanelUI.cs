@@ -1,5 +1,6 @@
 using RogueLike.Core;
 using RogueLike.Data;
+using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -16,17 +17,39 @@ namespace RogueLike.UI
 
         [SerializeField] private RectTransform _panel;
         [SerializeField] private Text _body;
-        private readonly Text[] _values = new Text[Names.Length];
+        [SerializeField] private Text _valueText;
+        private readonly StringBuilder _valueBuilder = new StringBuilder(320);
 
         private void Awake()
         {
             if (_panel == null)
-                _panel = (RectTransform)UIFactory.CreateImage(transform,
-                    new Color(0.07f, 0.07f, 0.12f, 0.95f), Vector2.zero, new Vector2(300f, 580f)).rectTransform;
+            {
+                var image = UIFactory.CreateImage(transform, Color.white,
+                    new Vector2(475f, 0f), new Vector2(330f, 500f));
+                image.name = "StatsPanel";
+                image.sprite = Resources.Load<Sprite>("Art/UI/ui_stats_panel_v2");
+                image.type = Image.Type.Simple;
+                _panel = image.rectTransform;
+            }
 
-            _panel.anchoredPosition = new Vector2(465f, 0f);
-            _panel.sizeDelta = new Vector2(300f, 580f);
-            if (_body != null) _body.gameObject.SetActive(false);
+            if (_body == null)
+            {
+                _body = UIFactory.CreateText(_panel, "", 16, new Color(0.88f, 0.84f, 0.78f),
+                    new Vector2(-82f, -20f), new Vector2(108f, 360f), TextAnchor.UpperLeft);
+                _body.lineSpacing = 1.3f;
+                _body.verticalOverflow = VerticalWrapMode.Truncate;
+            }
+            if (string.IsNullOrEmpty(_body.text)) _body.text = string.Join("\n", Names);
+            _body.gameObject.SetActive(true);
+
+            if (_valueText == null)
+            {
+                _valueText = UIFactory.CreateText(_panel, "", 16, Color.white,
+                    new Vector2(82f, -20f), new Vector2(108f, 360f), TextAnchor.UpperRight);
+                _valueText.lineSpacing = 1.3f;
+                _valueText.verticalOverflow = VerticalWrapMode.Truncate;
+            }
+            _valueText.supportRichText = true;
 
             Text title = null;
             foreach (var label in _panel.GetComponentsInChildren<Text>(true))
@@ -34,22 +57,7 @@ namespace RogueLike.UI
                 { title = label; break; }
             if (title == null)
                 title = UIFactory.CreateText(_panel, "当前属性", 22, Color.white,
-                    new Vector2(0f, 252f), new Vector2(260f, 32f));
-            title.text = "当前属性";
-            title.fontSize = 22;
-            title.rectTransform.anchoredPosition = new Vector2(0f, 252f);
-            title.rectTransform.sizeDelta = new Vector2(260f, 32f);
-
-            for (int i = 0; i < Names.Length; i++)
-            {
-                float y = 205f - i * 28f;
-                UIFactory.CreateText(_panel, Names[i], 14, new Color(0.85f, 0.83f, 0.8f),
-                    new Vector2(-80f, y), new Vector2(110f, 24f), TextAnchor.MiddleLeft);
-                _values[i] = UIFactory.CreateText(_panel, "", 14, Color.white,
-                    new Vector2(70f, y), new Vector2(130f, 24f), TextAnchor.MiddleRight);
-                _values[i].horizontalOverflow = HorizontalWrapMode.Overflow;
-                _values[i].verticalOverflow = VerticalWrapMode.Truncate;
-            }
+                    new Vector2(0f, 200f), new Vector2(260f, 34f));
 
             EventBus.StateChanged += OnStateChanged;
             _panel.gameObject.SetActive(false);
@@ -73,15 +81,20 @@ namespace RogueLike.UI
             var gm = GameManager.Instance;
             if (gm == null || gm.Player == null) return;
             var stats = gm.Player.Stats;
+            _valueBuilder.Clear();
             for (int i = 0; i < Names.Length; i++)
             {
                 var type = (StatType)i;
                 float current = stats.Get(type);
                 float difference = current - Baseline(type);
-                _values[i].text = Format(type, current);
-                _values[i].color = difference > 0.0001f ? new Color(0.46f, 0.95f, 0.54f)
-                    : difference < -0.0001f ? new Color(1f, 0.43f, 0.43f) : Color.white;
+                if (i > 0) _valueBuilder.Append('\n');
+                _valueBuilder.Append(difference > 0.0001f ? "<color=#75F28A>"
+                    : difference < -0.0001f ? "<color=#FF7070>" : "<color=#F7F2EC>");
+                _valueBuilder.Append(Format(type, current));
+                _valueBuilder.Append("</color>");
             }
+            string valueText = _valueBuilder.ToString();
+            if (_valueText.text != valueText) _valueText.text = valueText;
         }
 
         private static float Baseline(StatType type)
@@ -107,8 +120,8 @@ namespace RogueLike.UI
                 case StatType.MaxHp:
                 case StatType.Armor:
                 case StatType.Luck:
-                case StatType.Knockback:
-                case StatType.HpRegen: return v.ToString("0.0") + "/秒";
+                case StatType.Knockback: return v.ToString("0.#");
+                case StatType.HpRegen: return v.ToString("0.#") + "/秒";
                 case StatType.DodgeChance:
                 case StatType.CritChance:
                 case StatType.LifeSteal: return Mathf.RoundToInt(v * 100f) + "%";

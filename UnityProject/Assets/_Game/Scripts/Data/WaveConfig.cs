@@ -28,6 +28,7 @@ namespace RogueLike.Data
         // 生成预算：预算(w) = budgetBase + budgetPerWave × w
         public float budgetBase = 18f;
         public float budgetPerWave = 12f;
+        [Range(0f, 2f)] public float spawnBudgetSustainFraction = 0.6f;
 
         // 敌人缩放：HP(w) = maxHp × hpGrowth^(w−1)，伤害 × dmgGrowth^(w−1)，移速 × (1 + speedGrowth×(w−1))
         public float hpGrowth = 1.22f;
@@ -68,9 +69,9 @@ namespace RogueLike.Data
         public List<float> rarityPriceMult = new List<float> { 1f, 1.8f, 3.2f, 5.5f, 9f, 16f };
         public List<int> rarityUnlockWave = new List<int> { 1, 1, 4, 7, 10, 14 };
 
-        // 商店稀有度权重（旧配置兼容字段；实际档位概率由下方 shopTier* 控制）
+        // 波次结算强化的白、绿、蓝、紫、金、红品阶权重；商店档位由下方 shopTier* 控制。
         public int shopLevelUpWave = 4;
-        public List<float> rarityWeights = new List<float> { 50f, 30f, 15f, 4.5f, 0.8f };
+        public List<float> rarityWeights = new List<float> { 50f, 30f, 15f, 4.5f, 0.8f, 0.1f };
         public float luckWeightBonus = 0.4f;
         // 商店档位 2–6：每波概率、首次开放波次与概率上限。
         // Values are percentages; Luck multiplies each chance by (1 + luck / 100).

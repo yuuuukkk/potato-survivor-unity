@@ -384,7 +384,7 @@ MonoBehaviour:
     attackIntervalMultiplier: 1.15
     extraPierce: 2
   - id: smg_ricochet
-    displayName: 跳弹：冲锋枪
+    displayName: 折返弹：冲锋枪
     description: 快速子弹碰壁反弹 1 次；基础伤害 -30%，攻击间隔 +20%，反弹后伤害再衰减 25%。
     aiHint: 适合靠射速覆盖场边；失去部分近身火力。
     weaponId: smg
@@ -611,6 +611,248 @@ MonoBehaviour:
     damageBonusPerLevel: 0
     damageMultiplier: 0.82
     attackIntervalMultiplier: 1.1
+  - id: universal_honk_round
+    displayName: 尖叫弹：吓一跳
+    description: 常规子弹命中时概率触发小范围音波，让附近普通怪短暂减速；原本的子弹攻击方式不变。直击伤害 -16%，攻击间隔 +8%。
+    aiHint: 有点搞怪的群体减速弹；单发伤害和射速下降，适合多怪战斗。
+    weaponId: '*'
+    exclusiveGroup: universal_honk_round
+    kind: 10
+    rarity: 2
+    price: 47
+    maxLevel: 3
+    damageBonusPerLevel: 0
+    damageMultiplier: 0.84
+    attackIntervalMultiplier: 1.08
+    honkChance: 0.16
+    honkChancePerLevel: 0.08
+    honkRadius: 1.4
+    honkDuration: 1.3
+    honkMoveMultiplier: 0.65
+    honkTint: {r: 0.58, g: 0.88, b: 1, a: 1}
+  - id: pistol_blood_pack
+    displayName: 生机种：土豆手枪
+    description: 这把手枪亲手击杀敌人时有概率掉落红色生机种，拾取后回复生命。直接伤害降低；其他武器的击杀不触发。
+    aiHint: 续航分支，低伤换稳定的战场补给；需要亲自补刀。
+    weaponId: pistol
+    exclusiveGroup: pistol_blood_pack
+    kind: 11
+    rarity: 2
+    price: 44
+    maxLevel: 3
+    damageBonusPerLevel: 0
+    damageMultiplier: 0.83
+    healthPackChance: 0.1
+    healthPackChancePerLevel: 0.04
+    healthPackHeal: 8
+  - id: sniper_blood_pack
+    displayName: 狩猎生机：土豆狙击枪
+    description: 狙击枪击杀敌人时有较高概率掉落生机种；为了稳住续航，开火间隔略增。
+    aiHint: 让高伤单发承担补刀和续航，牺牲射速。
+    weaponId: sniper
+    exclusiveGroup: sniper_blood_pack
+    kind: 11
+    rarity: 2
+    price: 54
+    maxLevel: 3
+    damageBonusPerLevel: 0
+    attackIntervalMultiplier: 1.13
+    healthPackChance: 0.18
+    healthPackChancePerLevel: 0.05
+    healthPackHeal: 9
+  - id: sword_kill_growth
+    displayName: 养锋：土豆大剑
+    description: 这把剑每亲手击杀一定数量的敌人就永久增加本局伤害，有层数上限；起始伤害降低，卖掉武器会失去成长。
+    aiHint: 越早装备越有价值的长期投资，前期输出吃亏。
+    weaponId: sword
+    exclusiveGroup: sword_kill_growth
+    kind: 12
+    rarity: 2
+    price: 48
+    maxLevel: 3
+    damageBonusPerLevel: 0
+    damageMultiplier: 0.82
+    killsPerGrowthStack: 12
+    growthDamagePerStack: 0.045
+    growthDamagePerStackPerLevel: 0.01
+    growthMaxStacks: 10
+  - id: smg_kill_growth
+    displayName: 越打越热：冲锋枪
+    description: 这把冲锋枪的击杀数会累积为本局伤害成长，层数有限；初始伤害下降，成长只属于这一把枪。
+    aiHint: 适合高频持续攻击，但前几波需要承担低伤代价。
+    weaponId: smg
+    exclusiveGroup: smg_kill_growth
+    kind: 12
+    rarity: 2
+    price: 50
+    maxLevel: 3
+    damageBonusPerLevel: 0
+    damageMultiplier: 0.86
+    killsPerGrowthStack: 16
+    growthDamagePerStack: 0.035
+    growthDamagePerStackPerLevel: 0.008
+    growthMaxStacks: 12
+  - id: minigun_kill_growth
+    displayName: 战斗记录：加特林
+    description: 只有这把加特林的击杀会积累伤害层数；叠满后很强，但射速略降、前期伤害也低。
+    aiHint: 高投入的后期成长分支，须承担开局低输出风险。
+    weaponId: minigun
+    exclusiveGroup: minigun_kill_growth
+    kind: 12
+    rarity: 3
+    price: 78
+    maxLevel: 3
+    damageBonusPerLevel: 0
+    damageMultiplier: 0.88
+    attackIntervalMultiplier: 1.08
+    killsPerGrowthStack: 20
+    growthDamagePerStack: 0.03
+    growthDamagePerStackPerLevel: 0.007
+    growthMaxStacks: 14
+  - id: boomerang_kill_growth
+    displayName: 越转越利：回旋镖
+    description: 回旋镖每累积击杀便永久提升本局伤害；飞行速度不变，但初始伤害降低。
+    aiHint: 让回旋镖成为长期养成武器，前期需要补充其他输出。
+    weaponId: boomerang
+    exclusiveGroup: boomerang_kill_growth
+    kind: 12
+    rarity: 2
+    price: 42
+    maxLevel: 3
+    damageBonusPerLevel: 0
+    damageMultiplier: 0.85
+    killsPerGrowthStack: 10
+    growthDamagePerStack: 0.045
+    growthDamagePerStackPerLevel: 0.01
+    growthMaxStacks: 10
+  - id: pistol_ricochet_many
+    displayName: 连续折射
+    description: 前置折射弹；子弹可额外折射多次，但每次折射后的伤害衰减更明显。
+    aiHint: 折射弹的覆盖路线，适合密集怪群。
+    weaponId: pistol
+    parentId: pistol_ricochet
+    exclusiveGroup: pistol_ricochet_path
+    kind: 2
+    rarity: 2
+    price: 38
+    maxLevel: 3
+    damageBonusPerLevel: 0
+    extraBounces: 2
+    extraBouncesPerLevel: 1
+    bounceDamageMultiplier: 0.75
+    damageMultiplier: 0.9
+  - id: pistol_ricochet_force
+    displayName: 重击折射
+    description: 前置折射弹；不增加折射次数，改为提升本枪直击伤害，攻击间隔变长。
+    aiHint: 折射弹的高伤路线，适合精确补刀。
+    weaponId: pistol
+    parentId: pistol_ricochet
+    exclusiveGroup: pistol_ricochet_path
+    kind: 2
+    rarity: 2
+    price: 40
+    maxLevel: 3
+    damageBonusPerLevel: 0.08
+    extraBounces: 0
+    extraBouncesPerLevel: 0
+    bounceDamageMultiplier: 1
+    damageMultiplier: 1.22
+    attackIntervalMultiplier: 1.15
+  - id: pistol_blood_pack_many
+    displayName: 丰收落种
+    description: 前置生机种；生机种掉落更频繁，但每颗回复较少。
+    aiHint: 稳定续航路线，适合持续扫场。
+    weaponId: pistol
+    parentId: pistol_blood_pack
+    exclusiveGroup: pistol_blood_pack_path
+    kind: 11
+    rarity: 2
+    price: 36
+    maxLevel: 3
+    damageBonusPerLevel: 0
+    healthPackChance: 0.22
+    healthPackChancePerLevel: 0.05
+    healthPackHeal: 4
+  - id: pistol_blood_pack_large
+    displayName: 饱满种子
+    description: 前置生机种；生机种较少出现，但每颗回复更多生命。
+    aiHint: 大回复路线，适合偶尔补刀的武器。
+    weaponId: pistol
+    parentId: pistol_blood_pack
+    exclusiveGroup: pistol_blood_pack_path
+    kind: 11
+    rarity: 2
+    price: 39
+    maxLevel: 3
+    damageBonusPerLevel: 0
+    healthPackChance: 0.07
+    healthPackChancePerLevel: 0.02
+    healthPackHeal: 20
+  - id: sword_growth_quick
+    displayName: 速养锋
+    description: 前置养锋；较少击杀即可叠层，但每层加成较低。
+    aiHint: 早成型的剑成长路线，强度上限稍低。
+    weaponId: sword
+    parentId: sword_kill_growth
+    exclusiveGroup: sword_growth_path
+    kind: 12
+    rarity: 2
+    price: 37
+    maxLevel: 3
+    damageBonusPerLevel: 0
+    killsPerGrowthStack: 7
+    growthDamagePerStack: 0.028
+    growthDamagePerStackPerLevel: 0.006
+    growthMaxStacks: 10
+  - id: sword_growth_heavy
+    displayName: 厚积锋芒
+    description: 前置养锋；叠层更慢，但每层伤害加成更高。
+    aiHint: 晚成型的剑成长路线，需要稳住前几波。
+    weaponId: sword
+    parentId: sword_kill_growth
+    exclusiveGroup: sword_growth_path
+    kind: 12
+    rarity: 2
+    price: 42
+    maxLevel: 3
+    damageBonusPerLevel: 0
+    killsPerGrowthStack: 18
+    growthDamagePerStack: 0.09
+    growthDamagePerStackPerLevel: 0.016
+    growthMaxStacks: 8
+  - id: universal_charm_control
+    displayName: 甜蜜控制
+    description: 前置通用糖衣弹；魅惑概率提高，但本枪直击伤害进一步下降。
+    aiHint: 控制路线，适合高射速武器。
+    weaponId: '*'
+    parentId: universal_charm_round
+    exclusiveGroup: universal_charm_path
+    kind: 5
+    rarity: 2
+    price: 42
+    maxLevel: 3
+    damageBonusPerLevel: 0
+    damageMultiplier: 0.88
+    charmChance: 0.14
+    charmChancePerLevel: 0.05
+    charmDuration: 2
+  - id: universal_charm_duration
+    displayName: 余韵缠绕
+    description: 前置通用糖衣弹；魅惑概率变化较小，但持续时间明显延长，射速略慢。
+    aiHint: 持续控制路线，适合单发武器。
+    weaponId: '*'
+    parentId: universal_charm_round
+    exclusiveGroup: universal_charm_path
+    kind: 5
+    rarity: 2
+    price: 43
+    maxLevel: 3
+    damageBonusPerLevel: 0
+    attackIntervalMultiplier: 1.08
+    charmChance: 0.03
+    charmChancePerLevel: 0.015
+    charmDuration: 4
+    charmDurationPerLevel: 0.6
   directorChallengeModifiers:
   - id: crowd
     displayName: 怪潮
@@ -620,6 +862,11 @@ MonoBehaviour:
     spawnIntervalMultiplier: 1
     maxAliveBonus: 5
     openingEliteCount: 0
+    enemyHpMultiplier: 1
+    enemyDamageMultiplier: 1
+    enemySpeedMultiplier: 1
+    focusedEnemyId:
+    focusedEnemyWeightMultiplier: 1
     rewardMaterials: 12
   - id: rush
     displayName: 急袭
@@ -629,6 +876,11 @@ MonoBehaviour:
     spawnIntervalMultiplier: 0.78
     maxAliveBonus: 3
     openingEliteCount: 0
+    enemyHpMultiplier: 1
+    enemyDamageMultiplier: 1
+    enemySpeedMultiplier: 1
+    focusedEnemyId:
+    focusedEnemyWeightMultiplier: 1
     rewardMaterials: 12
   - id: elite
     displayName: 精英邀战
@@ -638,7 +890,96 @@ MonoBehaviour:
     spawnIntervalMultiplier: 1
     maxAliveBonus: 1
     openingEliteCount: 1
+    enemyHpMultiplier: 1
+    enemyDamageMultiplier: 1
+    enemySpeedMultiplier: 1
+    focusedEnemyId:
+    focusedEnemyWeightMultiplier: 1
     rewardMaterials: 16
+  - id: thickhide
+    displayName: 厚皮行军
+    riskDescription: 敌人更耐打，移动稍慢；需要持续输出。
+    minWave: 2
+    budgetMultiplier: 1.05
+    spawnIntervalMultiplier: 1
+    maxAliveBonus: 0
+    openingEliteCount: 0
+    enemyHpMultiplier: 1.4
+    enemyDamageMultiplier: 1
+    enemySpeedMultiplier: 0.9
+    focusedEnemyId:
+    focusedEnemyWeightMultiplier: 1
+    rewardMaterials: 15
+  - id: glass_blades
+    displayName: 玻璃刀锋
+    riskDescription: 敌人更脆却更致命；走位失误代价更高。
+    minWave: 2
+    budgetMultiplier: 1.05
+    spawnIntervalMultiplier: 1
+    maxAliveBonus: 0
+    openingEliteCount: 0
+    enemyHpMultiplier: 0.78
+    enemyDamageMultiplier: 1.3
+    enemySpeedMultiplier: 1
+    focusedEnemyId:
+    focusedEnemyWeightMultiplier: 1
+    rewardMaterials: 16
+  - id: crossfire
+    displayName: 远程交火
+    riskDescription: 紫皮射手更常出现，弹幕迫使玩家走位。
+    minWave: 2
+    budgetMultiplier: 1.08
+    spawnIntervalMultiplier: 1
+    maxAliveBonus: 0
+    openingEliteCount: 0
+    enemyHpMultiplier: 1
+    enemyDamageMultiplier: 1
+    enemySpeedMultiplier: 1
+    focusedEnemyId: ranger
+    focusedEnemyWeightMultiplier: 4
+    rewardMaterials: 15
+  - id: gale
+    displayName: 疾风追猎
+    riskDescription: 全体敌人提速，玩家需要保持移动。
+    minWave: 2
+    budgetMultiplier: 1.08
+    spawnIntervalMultiplier: 1
+    maxAliveBonus: 0
+    openingEliteCount: 0
+    enemyHpMultiplier: 1
+    enemyDamageMultiplier: 1
+    enemySpeedMultiplier: 1.24
+    focusedEnemyId:
+    focusedEnemyWeightMultiplier: 1
+    rewardMaterials: 15
+  - id: powder_keg
+    displayName: 火药桶
+    riskDescription: 红皮自爆怪更常出现，近身时要及时拉开。
+    minWave: 3
+    budgetMultiplier: 1.1
+    spawnIntervalMultiplier: 1
+    maxAliveBonus: 0
+    openingEliteCount: 0
+    enemyHpMultiplier: 1
+    enemyDamageMultiplier: 1
+    enemySpeedMultiplier: 1.08
+    focusedEnemyId: exploder
+    focusedEnemyWeightMultiplier: 4
+    rewardMaterials: 17
+  - id: iron_wall
+    displayName: 铁甲阵线
+    riskDescription: 铁皮坦克更常出现，正面清场更费时。
+    minWave: 4
+    budgetMultiplier: 1.1
+    spawnIntervalMultiplier: 1
+    maxAliveBonus: 0
+    openingEliteCount: 0
+    enemyHpMultiplier: 1.1
+    enemyDamageMultiplier: 1
+    enemySpeedMultiplier: 1
+    focusedEnemyId: tank
+    focusedEnemyWeightMultiplier: 5
+    rewardMaterials: 18
   enemies:
   - id: chaser
     displayName: "\u7EFF\u76AE\u5C0F\u602A"
@@ -662,6 +1003,8 @@ MonoBehaviour:
     color: '#6FBF4A'
     radius: 0.45
     spawnWeight: 100
+    firstWave: 1
+    weightGainPerWave: 0
   - id: ranger
     displayName: "\u7D2B\u76AE\u5C04\u624B"
     behavior: 1
@@ -684,6 +1027,8 @@ MonoBehaviour:
     color: '#A06FE0'
     radius: 0.42
     spawnWeight: 35
+    firstWave: 2
+    weightGainPerWave: 2
   - id: exploder
     displayName: "\u7EA2\u76AE\u81EA\u7206"
     behavior: 2
@@ -706,6 +1051,8 @@ MonoBehaviour:
     color: '#E05555'
     radius: 0.42
     spawnWeight: 25
+    firstWave: 3
+    weightGainPerWave: 2
   - id: tank
     displayName: "\u94C1\u76AE\u5766\u514B"
     behavior: 3
@@ -728,6 +1075,8 @@ MonoBehaviour:
     color: '#7A8A99'
     radius: 0.6
     spawnWeight: 15
+    firstWave: 4
+    weightGainPerWave: 2
   - id: splitter
     displayName: "\u5206\u88C2\u602A"
     behavior: 4
@@ -750,6 +1099,8 @@ MonoBehaviour:
     color: '#55C4C4'
     radius: 0.42
     spawnWeight: 20
+    firstWave: 5
+    weightGainPerWave: 2
   - id: elite_chaser
     displayName: "\u7CBE\u82F1\u8FD1\u6218"
     behavior: 0

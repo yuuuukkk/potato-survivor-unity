@@ -13,14 +13,16 @@ namespace RogueLike.UI
     {
         [SerializeField] private RectTransform _panel;
         [SerializeField] private RectTransform _grid;
+        [SerializeField] private RectTransform[] _cardFrames;
         [SerializeField] private Text _matText;
         [SerializeField] private Text _titleText;
         [SerializeField] private Button _refreshBtn;
         [SerializeField] private Button _nextWaveBtn;
-        private Button _challengeBtn;
-        private Button _buildBtn;
+        [SerializeField] private Image _materialIcon;
+        [SerializeField] private Button _challengeBtn;
+        [SerializeField] private Button _buildBtn;
         private WeaponBuildUI _buildUI;
-        private RectTransform _sellGrid;
+        [SerializeField] private RectTransform _sellGrid;
         private GameObject _sellDialog;
         private Text _sellDialogText;
         private Button _sellCancelBtn;
@@ -32,7 +34,7 @@ namespace RogueLike.UI
         private Text[] _challengeRisks;
         private Text[] _challengeRewards;
         private Text _challengeStatus;
-        private Text _feedbackText;
+        [SerializeField] private Text _feedbackText;
         private WeaponInstance _pendingSale;
         private Button[] _buyButtons;
         private Button[] _lockButtons;
@@ -46,32 +48,31 @@ namespace RogueLike.UI
         {
             // 优先使用预制体里的面板/网格/按钮；无预制体时回退代码创建
             if (_panel == null) Build();
-            _grid.anchoredPosition = Vector2.zero;
-            _grid.sizeDelta = new Vector2(900f, 400f);
-            if (_refreshBtn != null)
-            {
-                var rt = (RectTransform)_refreshBtn.transform;
-                rt.anchoredPosition = new Vector2(490f, -270f);
-                rt.sizeDelta = new Vector2(125f, 46f);
-            }
-            if (_nextWaveBtn != null)
-            {
-                var rt = (RectTransform)_nextWaveBtn.transform;
-                rt.anchoredPosition = new Vector2(300f, -270f);
-                rt.sizeDelta = new Vector2(180f, 46f);
-            }
-            _challengeBtn = UIFactory.CreateButton(_panel, "可选挑战", OpenChallengeDialog,
-                new Vector2(82f, -270f), new Vector2(160f, 46f), 17);
+            _matText.text = "0";
+            if (_materialIcon == null)
+                _materialIcon = UIFactory.CreateImage(_panel, Color.white,
+                    new Vector2(285f, 225f), new Vector2(30f, 30f));
+            _materialIcon.name = "MaterialIcon";
+            _materialIcon.sprite = AssetLoader.LoadMaterialPickupSprite();
+            _materialIcon.type = Image.Type.Simple;
+            _materialIcon.preserveAspect = true;
+            if (_challengeBtn == null)
+                _challengeBtn = UIFactory.CreateButton(_panel, "可选挑战", null,
+                    new Vector2(30f, -220f), new Vector2(160f, 46f), 17);
+            _challengeBtn.onClick.AddListener(OpenChallengeDialog);
             _buildUI = GetComponent<WeaponBuildUI>();
             if (_buildUI == null) _buildUI = gameObject.AddComponent<WeaponBuildUI>();
-            _buildBtn = UIFactory.CreateButton(_panel, "武器构筑", () => _buildUI.Open(),
-                new Vector2(-278f, -270f), new Vector2(160f, 46f), 17);
-            BuildSellGrid();
+            if (_buildBtn == null)
+                _buildBtn = UIFactory.CreateButton(_panel, "武器构筑", null,
+                    new Vector2(-210f, -220f), new Vector2(160f, 46f), 17);
+            _buildBtn.onClick.AddListener(() => _buildUI.Open());
+            if (_sellGrid == null) BuildSellGrid();
             BuildSellDialog();
             BuildChallengeDialog();
-            _feedbackText = UIFactory.CreateText(_panel, "", 14,
-                new Color(0.93f, 0.86f, 0.70f), new Vector2(-250f, -306f),
-                new Vector2(500f, 23f), TextAnchor.MiddleLeft);
+            if (_feedbackText == null)
+                _feedbackText = UIFactory.CreateText(_panel, "", 14,
+                    new Color(0.93f, 0.86f, 0.70f), new Vector2(-250f, -270f),
+                    new Vector2(500f, 23f), TextAnchor.MiddleLeft);
             HookButtons();
             EventBus.StateChanged += OnStateChanged;
             EventBus.MaterialsChanged += OnMaterialsChanged;
@@ -108,19 +109,20 @@ namespace RogueLike.UI
             _panel = (RectTransform)UIFactory.CreateImage(transform,
                 new Color(0.07f, 0.07f, 0.11f, 0.97f), Vector2.zero, new Vector2(1120f, 640f)).rectTransform;
 
-            _titleText = UIFactory.CreateText(_panel, "商店", 34, Color.white, new Vector2(0f, 268f), new Vector2(300f, 44f));
-            _matText = UIFactory.CreateText(_panel, "材料 0", 24, new Color(1f, 0.85f, 0.25f), new Vector2(0f, 226f), new Vector2(300f, 32f));
+            _titleText = UIFactory.CreateText(_panel, "商店", 34, Color.white, new Vector2(0f, 225f), new Vector2(300f, 44f));
+            _matText = UIFactory.CreateText(_panel, "0", 24, new Color(1f, 0.85f, 0.25f),
+                new Vector2(380f, 225f), new Vector2(140f, 32f), TextAnchor.MiddleLeft);
 
             var gridGo = new GameObject("SlotGrid");
             _grid = gridGo.AddComponent<RectTransform>();
             _grid.SetParent(_panel, false);
-            _grid.anchoredPosition = new Vector2(0f, 60f);
-            _grid.sizeDelta = new Vector2(840f, 300f);
+            _grid.anchoredPosition = new Vector2(0f, -30f);
+            _grid.sizeDelta = new Vector2(900f, 400f);
 
             _refreshBtn = UIFactory.CreateButton(_panel, "刷新", null,
-                new Vector2(490f, -270f), new Vector2(125f, 46f));
+                new Vector2(390f, -220f), new Vector2(125f, 46f));
             _nextWaveBtn = UIFactory.CreateButton(_panel, "下一波", null,
-                new Vector2(300f, -270f), new Vector2(180f, 46f));
+                new Vector2(220f, -220f), new Vector2(180f, 46f));
         }
 
         private void OnStateChanged(GameState state)
@@ -148,7 +150,7 @@ namespace RogueLike.UI
             var go = new GameObject("OwnedWeaponsForSale");
             _sellGrid = go.AddComponent<RectTransform>();
             _sellGrid.SetParent(_panel, false);
-            _sellGrid.anchoredPosition = new Vector2(-220f, -202f);
+            _sellGrid.anchoredPosition = new Vector2(-220f, -175f);
             _sellGrid.sizeDelta = new Vector2(640f, 78f);
         }
 
@@ -240,7 +242,7 @@ namespace RogueLike.UI
                 _modalButtonStates[button] = button.interactable;
                 button.interactable = false;
             }
-            _challengeStatus.text = $"上波击杀 {GameManager.Instance.LastWaveKills} · 剩余生命 {Mathf.RoundToInt(GameManager.Instance.LastWaveHpPercent * 100f)}%";
+            _challengeStatus.text = $"{(IsAIChallengeConfigured() ? "本地挑战 · 可用 AI 改写" : "本地挑战 · 未启用 AI")} · 上波击杀 {GameManager.Instance.LastWaveKills} · 剩余生命 {Mathf.RoundToInt(GameManager.Instance.LastWaveHpPercent * 100f)}%";
             RefreshChallengeDialog();
             if (EventSystem.current != null)
             {
@@ -392,6 +394,7 @@ namespace RogueLike.UI
         {
             var shop = Shop;
             if (shop == null) return;
+            TooltipUI.Instance?.Hide();
             int focusedSlot = -1;
             bool focusLock = false;
             var selected = EventSystem.current != null ? EventSystem.current.currentSelectedGameObject : null;
@@ -405,7 +408,7 @@ namespace RogueLike.UI
                         focusLock = true;
                     }
                 }
-            _matText.text = "材料 " + GameManager.Instance.Materials;
+            _matText.text = GameManager.Instance.Materials.ToString();
             _titleText.text = $"商店 — 第 {shop.Wave} 波";
             if (_refreshBtn != null)
             {
@@ -416,11 +419,13 @@ namespace RogueLike.UI
             if (_challengeBtn != null)
                 _challengeBtn.gameObject.SetActive(shop.ChallengeOffers.Count == 4);
 
-            // 清空旧槽
+            // 场景内的卡片保留 RectTransform，刷新时只更新内容。
             for (int i = _grid.childCount - 1; i >= 0; i--)
             {
-                _grid.GetChild(i).gameObject.SetActive(false);
-                Destroy(_grid.GetChild(i).gameObject);
+                var child = _grid.GetChild(i);
+                child.gameObject.SetActive(false);
+                if (_cardFrames == null || System.Array.IndexOf(_cardFrames, child as RectTransform) < 0)
+                    Destroy(child.gameObject);
             }
 
             int n = shop.Slots.Count;
@@ -442,45 +447,65 @@ namespace RogueLike.UI
         {
             for (int i = _sellGrid.childCount - 1; i >= 0; i--)
             {
-                _sellGrid.GetChild(i).gameObject.SetActive(false);
-                Destroy(_sellGrid.GetChild(i).gameObject);
+                var child = _sellGrid.GetChild(i);
+                child.gameObject.SetActive(false);
+                if (child.name != "Title" && !child.name.StartsWith("OwnedWeapon_"))
+                    Destroy(child.gameObject);
             }
             var gm = GameManager.Instance;
             var ws = gm != null && gm.Player != null ? gm.Player.GetComponent<RogueLike.Combat.WeaponSystem>() : null;
             if (ws == null) return;
-            UIFactory.CreateText(_sellGrid, "持有武器（出售）", 15, Color.white,
-                new Vector2(-225f, 34f), new Vector2(190f, 24f));
+            var title = _sellGrid.Find("Title")?.GetComponent<Text>();
+            if (title == null)
+                title = UIFactory.CreateText(_sellGrid, "持有武器（出售）", 15, Color.white,
+                    new Vector2(-225f, 34f), new Vector2(190f, 24f));
+            title.name = "Title";
+            title.text = "持有武器（出售）";
+            title.gameObject.SetActive(true);
             for (int i = 0; i < ws.Weapons.Count; i++)
             {
                 var weapon = ws.Weapons[i];
-                var btn = UIFactory.CreateButton(_sellGrid, "", () => ShowSellDialog(weapon),
-                    new Vector2(-255f + i * 78f, -7f), new Vector2(68f, 62f), 12);
+                var authored = _sellGrid.Find("OwnedWeapon_" + (i + 1));
+                var btn = authored != null ? authored.GetComponent<Button>() : null;
+                if (btn == null)
+                    btn = UIFactory.CreateButton(_sellGrid, "", null,
+                        new Vector2(-255f + i * 78f, -7f), new Vector2(68f, 62f), 12);
+                btn.gameObject.SetActive(true);
+                btn.onClick.RemoveAllListeners();
+                btn.onClick.AddListener(() => ShowSellDialog(weapon));
                 var tint = RarityInfo.Color((Rarity)Mathf.Clamp(weapon.Level - 1, 0, 4));
                 btn.GetComponent<Image>().color = tint;
-                var art = UIFactory.CreateImage(btn.transform, Color.white,
-                    new Vector2(0f, 5f), new Vector2(46f, 40f));
+                var art = btn.transform.Find("Art")?.GetComponent<Image>();
+                if (art == null)
+                    art = UIFactory.CreateImage(btn.transform, Color.white,
+                        new Vector2(0f, 5f), new Vector2(46f, 40f));
                 art.sprite = AssetLoader.LoadWeaponSprite(weapon.Data.id);
                 if (art.sprite != null) art.type = Image.Type.Simple;
                 art.preserveAspect = true;
                 art.raycastTarget = false;
-                var levelText = UIFactory.CreateText(btn.transform, $"Lv.{weapon.Level}", 11, Color.white,
-                    new Vector2(0f, -22f), new Vector2(58f, 16f));
+                var levelText = btn.transform.Find("Level")?.GetComponent<Text>();
+                if (levelText == null)
+                    levelText = UIFactory.CreateText(btn.transform, "", 11, Color.white,
+                        new Vector2(0f, -22f), new Vector2(58f, 16f));
+                levelText.text = $"Lv.{weapon.Level}";
                 levelText.raycastTarget = false;
             }
         }
 
         private void CreateSlot(int index, ShopSystem.ShopSlot slot)
         {
-            int col = index % 3;
-            int row = index / 3;
-            Vector2 pos = new Vector2(-310f + col * 310f, 25f - row * 375f);
-
-            // 槽背景：稀有度色边框（外框）+ 暗色内底
-            var frame = (RectTransform)UIFactory.CreateImage(_grid,
-                RarityInfo.Color(slot.Rarity), pos, new Vector2(260f, 360f)).rectTransform;
-            var bg = (RectTransform)UIFactory.CreateImage(frame,
-                RarityInfo.Color(slot.Rarity) * 0.15f + new Color(0.12f, 0.12f, 0.16f),
-                Vector2.zero, new Vector2(252f, 352f)).rectTransform;
+            var bg = _cardFrames != null && index < _cardFrames.Length ? _cardFrames[index] : null;
+            bool authored = bg != null;
+            if (!authored)
+            {
+                int col = index % 3;
+                int row = index / 3;
+                bg = (RectTransform)UIFactory.CreateShopCard(_grid,
+                    new Vector2(-310f + col * 310f, 25f - row * 375f),
+                    new Vector2(260f, 330f)).rectTransform;
+            }
+            bg.gameObject.SetActive(true);
+            bg.GetComponent<Image>().raycastTarget = true;
 
             var ws = GameManager.Instance.Player != null ? GameManager.Instance.Player.GetComponent<RogueLike.Combat.WeaponSystem>() : null;
             int ownedBuildLevel = slot.IsModification && ws != null ? ws.ModificationLevel(slot.Modification.id) : 0;
@@ -488,77 +513,114 @@ namespace RogueLike.UI
                 slot.IsModification ? slot.Modification.displayName : slot.Item.displayName;
             string sub;
             if (slot.IsWeapon) sub = $"{slot.WeaponLevel} 级 · {slot.Weapon.description}";
-            else if (slot.IsModification) sub = ModificationPreview(slot.Modification, ownedBuildLevel + 1) +
+            else if (slot.IsModification) sub = (slot.Modification.IsBranch
+                    ? "前置：" + (GameDatabase.GetWeaponModification(slot.Modification.parentId)?.displayName ?? "基础构筑") + "\n"
+                    : "基础构筑 · 占一个武器槽\n") +
+                ModificationPreview(slot.Modification, ownedBuildLevel + 1) +
                 "\n" + slot.Modification.description;
             else if (slot.IsHeal) sub = $"立即回复 {slot.Item.healAmount} HP";
             else sub = slot.Item.description;
 
-            UIFactory.CreateText(bg, name, 21, RarityInfo.Color(slot.Rarity), new Vector2(0f, 143f), new Vector2(230f, 30f));
+            var details = bg.GetComponent<EventTrigger>();
+            if (details == null) details = bg.gameObject.AddComponent<EventTrigger>();
+            details.triggers.Clear();
+            var click = new EventTrigger.Entry { eventID = EventTriggerType.PointerClick };
+            click.callback.AddListener(_ => TooltipUI.Instance?.Show(name, sub,
+                RarityInfo.Color(slot.Rarity), new Vector2(420f, 210f)));
+            details.triggers.Add(click);
+            var exit = new EventTrigger.Entry { eventID = EventTriggerType.PointerExit };
+            exit.callback.AddListener(_ => TooltipUI.Instance?.Hide());
+            details.triggers.Add(exit);
+
+            var nameText = authored ? FindCardPart<Text>(bg, "Name") : null;
+            if (nameText == null)
+                nameText = UIFactory.CreateText(bg, name, 21, RarityInfo.Color(slot.Rarity),
+                    new Vector2(0f, 100f), new Vector2(218f, 32f));
+            nameText.text = name;
+            nameText.color = RarityInfo.Color(slot.Rarity);
+            if (!authored)
+            {
+                nameText.resizeTextForBestFit = true;
+                nameText.resizeTextMinSize = 18;
+                nameText.resizeTextMaxSize = 21;
+            }
             string targetName = slot.IsModification
                 ? slot.Modification.IsUniversal
                     ? slot.Modification.kind == WeaponModificationKind.EnlargedProjectile
                         ? "投射物枪械" : "非爆炸子弹枪械"
                     :
                     GameDatabase.GetWeapon(slot.Modification.weaponId)?.displayName : null;
-            UIFactory.CreateText(bg, slot.IsWeapon ? $"{slot.WeaponLevel} 级武器" :
+            string category = slot.IsWeapon ? $"{slot.WeaponLevel} 级武器" :
                 slot.IsModification ? slot.Modification.IsUniversal
-                    ? $"通用弹药 · Lv.{ownedBuildLevel + 1}/{slot.Modification.MaxLevel}"
-                    : (targetName ?? slot.Modification.weaponId) + $" · Lv.{ownedBuildLevel + 1}/{slot.Modification.MaxLevel}"
-                    : "道具", 13,
-                new Color(0.75f, 0.73f, 0.72f), new Vector2(0f, 113f), new Vector2(224f, 20f));
-            if (slot.IsModification && slot.Modification.IsUniversal)
+                    ? $"{(slot.Modification.IsBranch ? "通用支线" : "通用基础")} · Lv.{ownedBuildLevel + 1}/{slot.Modification.MaxLevel}"
+                    : (targetName ?? slot.Modification.weaponId) +
+                      $" · {(slot.Modification.IsBranch ? "支线" : "基础")} Lv.{ownedBuildLevel + 1}/{slot.Modification.MaxLevel}"
+                    : "道具";
+            var categoryText = authored ? FindCardPart<Text>(bg, "Category") : null;
+            if (categoryText == null)
+                categoryText = UIFactory.CreateText(bg, category, 16,
+                    new Color(0.82f, 0.81f, 0.83f), new Vector2(0f, 70f), new Vector2(218f, 25f));
+            categoryText.text = category;
+            Sprite productSprite = slot.IsModification && slot.Modification.IsUniversal ? null :
+                slot.IsWeapon || slot.IsModification
+                    ? AssetLoader.LoadWeaponSprite(slot.IsWeapon ? slot.Weapon.id : slot.Modification.weaponId)
+                    : AssetLoader.LoadItemSprite(slot.Item.IconId);
+            var art = authored ? FindCardPart<Image>(bg, "Art") : null;
+            if (art == null)
+                art = UIFactory.CreateImage(bg, Color.white, new Vector2(0f, 13f), new Vector2(82f, 82f));
+            var symbol = authored ? FindCardPart<Text>(bg, "Art/Symbol") : null;
+            if (productSprite != null)
             {
-                var emblem = (RectTransform)UIFactory.CreateImage(bg, RarityInfo.Color(slot.Rarity),
-                    new Vector2(0f, 32f), new Vector2(82f, 82f)).rectTransform;
-                UIFactory.CreateText(emblem, "弹", 43, Color.white,
-                    Vector2.zero, new Vector2(72f, 66f));
-            }
-            else if (slot.IsWeapon || slot.IsModification)
-            {
-                var art = UIFactory.CreateImage(bg, Color.white, new Vector2(0f, 32f), new Vector2(105f, 105f));
-                art.sprite = AssetLoader.LoadWeaponSprite(slot.IsWeapon ? slot.Weapon.id : slot.Modification.weaponId);
-                if (art.sprite != null) art.type = Image.Type.Simple;
+                art.sprite = productSprite;
+                art.color = Color.white;
+                art.type = Image.Type.Simple;
                 art.preserveAspect = true;
+                if (symbol != null) symbol.text = "";
             }
             else
             {
-                var sprite = AssetLoader.LoadItemSprite(slot.Item.IconId);
-                if (sprite != null)
-                {
-                    var art = UIFactory.CreateImage(bg, Color.white, new Vector2(0f, 32f), new Vector2(105f, 105f));
-                    art.sprite = sprite;
-                    art.type = Image.Type.Simple;
-                    art.preserveAspect = true;
-                }
-                else
-                {
-                    var emblem = (RectTransform)UIFactory.CreateImage(bg, RarityInfo.Color(slot.Rarity),
-                        new Vector2(0f, 32f), new Vector2(88f, 88f)).rectTransform;
-                    UIFactory.CreateText(emblem, slot.IsHeal ? "+" : string.IsNullOrEmpty(name) ? "?" : name.Substring(0, 1), 43, Color.white,
+                var theme = Resources.Load<UIThemeSO>("Config/UITheme");
+                art.sprite = theme != null ? theme.roundedCard : null;
+                art.color = RarityInfo.Color(slot.Rarity);
+                art.type = Image.Type.Simple;
+                string mark = slot.IsModification && slot.Modification.IsUniversal ? "弹" :
+                    slot.IsHeal ? "+" : string.IsNullOrEmpty(name) ? "?" : name.Substring(0, 1);
+                if (symbol == null)
+                    symbol = UIFactory.CreateText(art.transform, mark, 43, Color.white,
                         Vector2.zero, new Vector2(76f, 68f));
-                }
+                else symbol.text = mark;
             }
-            var description = UIFactory.CreateText(bg, sub, 14, new Color(0.9f, 0.88f, 0.85f),
-                new Vector2(0f, -65f), new Vector2(224f, 82f));
-            description.verticalOverflow = VerticalWrapMode.Truncate;
+            var description = authored ? FindCardPart<Text>(bg, "Description") : null;
+            if (description == null)
+                description = UIFactory.CreateText(bg, sub, 16, new Color(0.96f, 0.94f, 0.91f),
+                    new Vector2(0f, -58f), new Vector2(210f, 54f));
+            description.text = sub;
+            if (!authored)
+            {
+                description.verticalOverflow = VerticalWrapMode.Truncate;
+                description.resizeTextForBestFit = false;
+            }
 
-            var buyBtn = UIFactory.CreateButton(bg, "购买 · " + slot.Price,
-                () =>
-                {
-                    bool bought = Shop != null && Shop.Buy(index);
-                    if (_feedbackText != null) _feedbackText.text = bought
-                        ? slot.IsModification ? "构筑已解锁/升级：打开「武器构筑」逐把装备" : "购买成功"
-                        : "无法购买，请检查材料或容量";
-                    Refresh();
-                },
-                new Vector2(-33f, -140f), new Vector2(140f, 38f), 17);
+            System.Action purchase = () =>
+            {
+                bool bought = Shop != null && Shop.Buy(index);
+                if (_feedbackText != null) _feedbackText.text = bought
+                    ? slot.IsModification ? "构筑已解锁/升级：打开「武器构筑」逐把装备" : "购买成功"
+                    : "无法购买，请检查材料或容量";
+                Refresh();
+            };
+            var buyBtn = authored ? FindCardPart<Button>(bg, "BuyButton") : null;
+            if (buyBtn == null)
+                buyBtn = UIFactory.CreateButton(bg, "购买 · " + slot.Price, () => purchase(),
+                    new Vector2(-33f, -112f), new Vector2(140f, 38f), 17);
+            else
+            {
+                buyBtn.onClick.RemoveAllListeners();
+                buyBtn.onClick.AddListener(() => purchase());
+                var feel = buyBtn.GetComponent<ButtonFeel>();
+                if (feel != null) buyBtn.onClick.AddListener(feel.PlayClick);
+            }
             bool affordable = GameManager.Instance.Materials >= slot.Price;
-            var remaining = UIFactory.CreateText(bg,
-                affordable ? "购买后剩余 " + (GameManager.Instance.Materials - slot.Price) + " 材料" :
-                    "还差 " + (slot.Price - GameManager.Instance.Materials) + " 材料",
-                13, affordable ? new Color(0.76f, 0.92f, 0.72f) : UIFactory.UnaffordableColor,
-                new Vector2(0f, -107f), new Vector2(222f, 22f));
-            remaining.verticalOverflow = VerticalWrapMode.Truncate;
             bool usable = slot.IsWeapon
                 ? ws != null && ws.CanAcquire(slot.Weapon, slot.WeaponLevel)
                 : slot.IsModification ? ws != null && ws.CanApplyModification(slot.Modification)
@@ -570,17 +632,35 @@ namespace RogueLike.UI
             buyBtn.interactable = affordable && usable && !itemFull;
             _buyButtons[index] = buyBtn;
             var buyLabel = buyBtn.GetComponentInChildren<Text>();
+            buyLabel.text = "购买 · " + slot.Price;
             if (!affordable) buyLabel.text = "差 " + (slot.Price - GameManager.Instance.Materials) + " 材料";
             else if (slot.IsModification && !usable) buyLabel.text = "已满级/不可用";
             else if (!usable) buyLabel.text = "当前无法使用";
             else if (itemFull) buyLabel.text = "携带已满";
             buyLabel.color = buyBtn.interactable ? UIFactory.ButtonTextColor : UIFactory.UnaffordableColor;
 
-            var lockBtn = UIFactory.CreateButton(bg, slot.Locked ? "解锁" : "锁定",
-                () => { if (Shop != null) Shop.ToggleLock(index); Refresh(); },
-                new Vector2(87f, -140f), new Vector2(65f, 38f), 14);
+            System.Action toggleLock = () => { if (Shop != null) Shop.ToggleLock(index); Refresh(); };
+            var lockBtn = authored ? FindCardPart<Button>(bg, "LockButton") : null;
+            if (lockBtn == null)
+                lockBtn = UIFactory.CreateButton(bg, slot.Locked ? "解锁" : "锁定",
+                    () => toggleLock(), new Vector2(87f, -112f), new Vector2(65f, 38f), 14);
+            else
+            {
+                lockBtn.onClick.RemoveAllListeners();
+                lockBtn.onClick.AddListener(() => toggleLock());
+                var feel = lockBtn.GetComponent<ButtonFeel>();
+                if (feel != null) lockBtn.onClick.AddListener(feel.PlayClick);
+            }
             _lockButtons[index] = lockBtn;
-            lockBtn.GetComponentInChildren<Text>().color = slot.Locked ? new Color(0.65f, 0.38f, 0.05f) : UIFactory.ButtonTextColor;
+            var lockLabel = lockBtn.GetComponentInChildren<Text>();
+            lockLabel.text = slot.Locked ? "解锁" : "锁定";
+            lockLabel.color = slot.Locked ? new Color(0.65f, 0.38f, 0.05f) : UIFactory.ButtonTextColor;
+        }
+
+        private static T FindCardPart<T>(RectTransform card, string path) where T : Component
+        {
+            var child = card.Find(path);
+            return child != null ? child.GetComponent<T>() : null;
         }
 
         private static string ModificationPreview(WeaponModificationData mod, int level)
@@ -589,7 +669,8 @@ namespace RogueLike.UI
             switch (mod.kind)
             {
                 case WeaponModificationKind.Ricochet:
-                    return "本级：反弹 " + (mod.extraBounces + Mathf.RoundToInt(upgrades * mod.extraBouncesPerLevel)) + " 次";
+                    return (mod.IsBranch ? "支线追加：" : "本级：") + "折射 " +
+                        (mod.extraBounces + Mathf.RoundToInt(upgrades * mod.extraBouncesPerLevel)) + " 次";
                 case WeaponModificationKind.CharmProjectile:
                     return "本级：魅惑 " + Mathf.RoundToInt(100f * Mathf.Clamp01(
                         mod.charmChance + upgrades * mod.charmChancePerLevel)) + "% / " +
@@ -597,6 +678,25 @@ namespace RogueLike.UI
                 case WeaponModificationKind.EnlargedProjectile:
                     return "本级：弹体 ×" + (mod.projectileSizeMultiplier +
                         upgrades * mod.projectileSizePerLevel).ToString("0.00");
+                case WeaponModificationKind.VacuumRocket:
+                    return "本级：最多吸收 " + (mod.vacuumAbsorbLimit + upgrades * mod.vacuumAbsorbPerLevel) + " 发敌弹";
+                case WeaponModificationKind.SpringPunch:
+                    return "本级：击退 " + (mod.springKnockback +
+                        upgrades * mod.springKnockbackPerLevel).ToString("0.0") + "；撞击追加伤害";
+                case WeaponModificationKind.BoomerangCollector:
+                    return "本级：每拾取一颗，回程伤害 +" + Mathf.RoundToInt(100f *
+                        (mod.returnBonusPerPickup + upgrades * mod.returnBonusPerPickupPerLevel)) + "%";
+                case WeaponModificationKind.HonkProjectile:
+                    return "本级：音波触发 " + Mathf.RoundToInt(100f * Mathf.Clamp01(
+                        mod.honkChance + upgrades * mod.honkChancePerLevel)) + "%";
+                case WeaponModificationKind.BloodPackOnKill:
+                    return "本级：本武器击杀掉生机种 " + Mathf.RoundToInt(100f * Mathf.Clamp01(
+                        mod.healthPackChance + upgrades * mod.healthPackChancePerLevel)) +
+                        "% · 回复 " + mod.healthPackHeal.ToString("0") + " HP";
+                case WeaponModificationKind.KillGrowth:
+                    return "本级：每 " + mod.killsPerGrowthStack + " 击杀伤害 +" + Mathf.RoundToInt(100f *
+                        (mod.growthDamagePerStack + upgrades * mod.growthDamagePerStackPerLevel)) +
+                        "% · 最多 " + mod.growthMaxStacks + " 层";
                 default:
                     return "购买后 Lv." + level + "/" + mod.MaxLevel;
             }

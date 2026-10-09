@@ -27,6 +27,10 @@ namespace RogueLike.Enemies
         private float _damage;
         private Enemy _source;
         private CircleCollider2D _playerCollider;
+        private Transform _chargeCaster;
+        private SpriteRenderer[] _chargeOrbs;
+        private float _chargeDuration;
+        private bool _charging;
 
         public static Sprite[] RedFrames { get { LoadFrames(); return _red; } }
         public static Sprite[] MagicFrames { get { LoadFrames(); return _magic; } }
@@ -77,6 +81,16 @@ namespace RogueLike.Enemies
             go.AddComponent<BossVfxAtlas>().BeginBurst(_magic, position, size, 0.085f);
         }
 
+        public static BossVfxAtlas SpawnMagicCharge(Transform caster, float duration)
+        {
+            LoadFrames();
+            if (caster == null || _magic == null || _magic.Length < 2) return null;
+            var go = new GameObject("BossMagicCharge");
+            var effect = go.AddComponent<BossVfxAtlas>();
+            effect.BeginCharge(caster, duration);
+            return effect;
+        }
+
         private void Awake()
         {
             _renderer = gameObject.AddComponent<SpriteRenderer>();
@@ -122,6 +136,30 @@ namespace RogueLike.Enemies
             SetSize(size);
         }
 
+        private void BeginCharge(Transform caster, float duration)
+        {
+            _charging = true;
+            _chargeCaster = caster;
+            _chargeDuration = Mathf.Max(0.05f, duration);
+            _elapsed = 0f;
+            _renderer.enabled = false;
+            _chargeOrbs = new SpriteRenderer[3];
+            for (int i = 0; i < _chargeOrbs.Length; i++)
+            {
+                var orb = new GameObject("MagicOrb");
+                orb.transform.SetParent(transform, false);
+                var sr = orb.AddComponent<SpriteRenderer>();
+                sr.sprite = _magic[0];
+                sr.sortingOrder = 8;
+                _chargeOrbs[i] = sr;
+            }
+        }
+
+        public void EndCharge()
+        {
+            if (this != null) Destroy(gameObject);
+        }
+
         private void SetSize(float worldSize)
         {
             float spriteSize = Mathf.Max(0.01f, _renderer.sprite.bounds.size.x);
@@ -131,6 +169,31 @@ namespace RogueLike.Enemies
         private void Update()
         {
             _elapsed += Time.deltaTime;
+            if (_charging)
+            {
+                if (_chargeCaster == null || !_chargeCaster.gameObject.activeInHierarchy || _elapsed >= _chargeDuration)
+                {
+                    Destroy(gameObject);
+                    return;
+                }
+                float progress = Mathf.Clamp01(_elapsed / _chargeDuration);
+                float eased = progress * progress * (3f - 2f * progress);
+                transform.position = _chargeCaster.position;
+                for (int i = 0; i < _chargeOrbs.Length; i++)
+                {
+                    var orb = _chargeOrbs[i];
+                    float angle = _elapsed * 9f + i * Mathf.PI * 2f / _chargeOrbs.Length;
+                    float radius = Mathf.Lerp(1.05f, 0.32f, eased);
+                    orb.transform.localPosition = new Vector3(Mathf.Cos(angle) * radius,
+                        Mathf.Sin(angle) * radius + 0.25f, 0f);
+                    orb.sprite = _magic[Mathf.FloorToInt(_elapsed * 13f) % 2];
+                    float spriteWidth = Mathf.Max(0.01f, orb.sprite.bounds.size.x);
+                    float size = Mathf.Lerp(0.42f, 0.75f, eased);
+                    orb.transform.localScale = Vector3.one * (size / spriteWidth);
+                    orb.color = new Color(1f, 1f, 1f, Mathf.Clamp01(0.55f + progress * 0.45f));
+                }
+                return;
+            }
             if (_travelling)
             {
                 transform.position += (Vector3)(_travelDirection * _travelSpeed * Time.deltaTime);

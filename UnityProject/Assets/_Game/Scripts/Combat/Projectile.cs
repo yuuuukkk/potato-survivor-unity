@@ -31,6 +31,7 @@ namespace RogueLike.Combat
         private bool _out = true;
         private ObjectPool _pool;
         private PlayerStats _sourceStats;
+        private WeaponInstance _sourceWeapon;
         private SpriteRenderer _visual;
         private Sprite _defaultSprite;
         private bool _bossMagicVisual;
@@ -41,6 +42,10 @@ namespace RogueLike.Combat
         private float _bounceDamageMultiplier = 1f;
         private Transform _art;
         private Vector3 _defaultArtScale;
+        private Vector3 _defaultArtPosition;
+        private SpriteRenderer _artRenderer;
+        private Sprite _defaultArtSprite;
+        private float _visualScaleMultiplier = 1f;
         private CircleCollider2D _circle;
         private float _defaultColliderRadius;
         private float _charmChance;
@@ -59,6 +64,14 @@ namespace RogueLike.Combat
         private float _returnBonusPerPickup;
         private int _maxPickupBonusCount;
         private int _collectedPickups;
+        private float _honkChance;
+        private float _honkRadius;
+        private float _honkDuration;
+        private float _honkMoveMultiplier;
+        private Color _honkTint;
+        private static readonly List<Enemy> HonkCandidates = new List<Enemy>();
+        private static int _buildSkinSequence;
+        private bool _preferCharmSkin;
 
         public void Launch(Vector3 pos, Vector2 dir, int team, float damage, float speed, float maxDist,
             int pierce, float explodeRadius, bool isCrit, bool boomerang, ObjectPool pool, PlayerStats sourceStats)
@@ -80,6 +93,7 @@ namespace RogueLike.Combat
             _out = true;
             _pool = pool;
             _sourceStats = sourceStats;
+            _sourceWeapon = null;
             _bouncesRemaining = 0;
             _ricochetEnabled = false;
             _bounceDamageMultiplier = 1f;
@@ -98,7 +112,19 @@ namespace RogueLike.Combat
             _maxPickupBonusCount = 0;
             _collectedPickups = 0;
             _nearbyPickups.Clear();
-            if (_art != null) _art.localScale = _defaultArtScale;
+            _honkChance = 0f;
+            _honkRadius = 0f;
+            _honkDuration = 0f;
+            _honkMoveMultiplier = 1f;
+            _preferCharmSkin = (++_buildSkinSequence & 1) == 0;
+            EnsureArt();
+            _visualScaleMultiplier = 1f;
+            if (_art != null)
+            {
+                _art.localScale = _defaultArtScale;
+                _art.localPosition = _defaultArtPosition;
+            }
+            if (_artRenderer != null) _artRenderer.sprite = _defaultArtSprite;
             if (_circle != null) _circle.radius = _defaultColliderRadius;
         }
 
@@ -110,11 +136,42 @@ namespace RogueLike.Combat
             _bounceDamageMultiplier = Mathf.Clamp(damageMultiplier, 0.1f, 1f);
         }
 
+        public void SetSourceWeapon(WeaponInstance weapon) => _sourceWeapon = weapon;
+
         public void ConfigureCharm(float chance, float duration, float damagePerSecond)
         {
             _charmChance = Mathf.Clamp01(chance);
             _charmDuration = Mathf.Max(0f, duration);
             _charmDamagePerSecond = Mathf.Max(0f, damagePerSecond);
+            RefreshBuildVisual();
+        }
+
+        public void ConfigureHonk(float chance, float radius, float duration, float moveMultiplier, Color tint)
+        {
+            _honkChance = Mathf.Clamp01(chance);
+            _honkRadius = Mathf.Max(0f, radius);
+            _honkDuration = Mathf.Max(0f, duration);
+            _honkMoveMultiplier = Mathf.Clamp(moveMultiplier, 0.1f, 1f);
+            _honkTint = tint;
+            RefreshBuildVisual();
+        }
+
+        public static void TryHonkPulse(Vector3 position, float chance, float radius, float duration,
+            float moveMultiplier, Color tint)
+        {
+            if (chance <= 0f || radius <= 0f || duration <= 0f || Random.value >= chance) return;
+            HitImpact.Spawn(position, Vector2.up, false, false, tint,
+                AssetLoader.LoadBuildEffectSprite("honk_impact"));
+            EnemyManager.CopyAliveTo(HonkCandidates);
+            foreach (var enemy in HonkCandidates)
+            {
+                if (enemy == null || !enemy.IsAlive || enemy.IsCharmed || enemy.BodyCollider == null) continue;
+                Vector2 center = enemy.BodyCollider.transform.TransformPoint(enemy.BodyCollider.offset);
+                float bodyRadius = enemy.BodyCollider.radius * Mathf.Max(Mathf.Abs(enemy.transform.lossyScale.x),
+                    Mathf.Abs(enemy.transform.lossyScale.y));
+                if (Vector2.Distance(position, center) <= radius + bodyRadius)
+                    enemy.ApplyHonkSlow(duration, moveMultiplier, tint);
+            }
         }
 
         public void ConfigureFriendlyEnemyShot(Enemy owner, Enemy target)
@@ -153,18 +210,48 @@ namespace RogueLike.Combat
 
         public void SetVisualScale(float multiplier)
         {
-            if (_art == null)
-            {
-                _art = transform.Find("ProjectileArt");
-                if (_art != null) _defaultArtScale = _art.localScale;
-            }
-            if (_art != null) _art.localScale = _defaultArtScale * Mathf.Max(0.1f, multiplier);
+            EnsureArt();
+            _visualScaleMultiplier = Mathf.Max(0.1f, multiplier);
+            RefreshBuildVisual();
             if (_circle == null)
             {
                 _circle = GetComponent<CircleCollider2D>();
                 if (_circle != null) _defaultColliderRadius = _circle.radius;
             }
-            if (_circle != null) _circle.radius = _defaultColliderRadius * Mathf.Max(0.1f, multiplier);
+            if (_circle != null) _circle.radius = _defaultColliderRadius * _visualScaleMultiplier;
+        }
+
+        private void EnsureArt()
+        {
+            if (_art != null) return;
+            _art = transform.Find("ProjectileArt");
+            if (_art == null) return;
+            _defaultArtScale = _art.localScale;
+            _defaultArtPosition = _art.localPosition;
+            _artRenderer = _art.GetComponent<SpriteRenderer>();
+            if (_artRenderer != null) _defaultArtSprite = _artRenderer.sprite;
+        }
+
+        private void RefreshBuildVisual()
+        {
+            EnsureArt();
+            if (_art == null || _artRenderer == null) return;
+            // Two effects can coexist on one gun. Alternate the two readable skins across pooled shots.
+            bool charm = _charmChance > 0f && (_honkChance <= 0f || _preferCharmSkin);
+            string id = charm ? "charm_projectile" : _honkChance > 0f ? "honk_projectile" : null;
+            var sprite = id != null ? AssetLoader.LoadBuildEffectSprite(id) : null;
+            _artRenderer.sprite = sprite != null ? sprite : _defaultArtSprite;
+            if (sprite == null)
+            {
+                _art.localScale = _defaultArtScale * _visualScaleMultiplier;
+                _art.localPosition = _defaultArtPosition;
+                return;
+            }
+            // Keep modified shots distinctive without dwarfing the normal bullets.
+            float size = charm ? 0.42f : 0.4f;
+            float spriteSize = Mathf.Max(sprite.bounds.size.x, sprite.bounds.size.y, 0.01f);
+            _art.localScale = Vector3.one * (size * _visualScaleMultiplier / spriteSize);
+            _art.localPosition = Vector3.zero;
         }
 
         public void SetBossMagicVisual(bool enabled)
@@ -227,6 +314,7 @@ namespace RogueLike.Combat
                 }
                 _dir = homeDirection.normalized;
             }
+            Vector2 previousPosition = transform.position;
             transform.position += (Vector3)(_dir * speed * Time.deltaTime);
             _travelled += speed * Time.deltaTime;
             if (boomerang) transform.Rotate(0f, 0f, 720f * Time.deltaTime);
@@ -235,10 +323,17 @@ namespace RogueLike.Combat
             {
                 ItemPool.CopyActiveTo(_nearbyPickups);
                 float radiusSquared = _collectionRadius * _collectionRadius;
+                Vector2 flightStep = (Vector2)transform.position - previousPosition;
+                float flightStepSquared = flightStep.sqrMagnitude;
                 foreach (var pickup in _nearbyPickups)
                 {
-                    if (pickup == null || ((Vector2)(pickup.transform.position - transform.position)).sqrMagnitude > radiusSquared)
-                        continue;
+                    if (pickup == null) continue;
+                    Vector2 pickupPosition = pickup.transform.position;
+                    float nearestFraction = flightStepSquared > 0.0001f
+                        ? Mathf.Clamp01(Vector2.Dot(pickupPosition - previousPosition, flightStep) / flightStepSquared)
+                        : 0f;
+                    Vector2 closestPoint = previousPosition + flightStep * nearestFraction;
+                    if ((pickupPosition - closestPoint).sqrMagnitude > radiusSquared) continue;
                     if (pickup.CollectNow())
                     {
                         _collectedPickups++;
@@ -383,9 +478,16 @@ namespace RogueLike.Combat
         private void HitEnemy(Enemy enemy)
         {
             enemy.TakeDamage(new DamageInfo(damage, gameObject, isCrit,
-                _sourceStats != null ? Mathf.Max(0f, _sourceStats.Get(StatType.Knockback)) : 0f));
+                _sourceStats != null ? Mathf.Max(0f, _sourceStats.Get(StatType.Knockback)) : 0f,
+                0f, _sourceWeapon));
+            TryHonkPulse(enemy.transform.position, _honkChance, _honkRadius, _honkDuration,
+                _honkMoveMultiplier, _honkTint);
             if (enemy.IsAlive && _charmChance > 0f && Random.value < _charmChance)
+            {
                 enemy.ApplyCharm(_charmDuration, _charmDamagePerSecond);
+                HitImpact.Spawn(enemy.transform.position, _dir, false, false,
+                    new Color(1f, 0.38f, 0.77f), AssetLoader.LoadBuildEffectSprite("charm_impact"));
+            }
             ApplyLifeSteal(damage);
             HandleHit();
         }
@@ -450,7 +552,7 @@ namespace RogueLike.Combat
                     {
                         enemy.TakeDamage(new DamageInfo(damage, gameObject, isCrit,
                             _sourceStats != null ? Mathf.Max(0f, _sourceStats.Get(StatType.Knockback)) : 0f,
-                            1.4f));
+                            1.4f, _sourceWeapon));
                         ApplyLifeSteal(damage);
                     }
                 }

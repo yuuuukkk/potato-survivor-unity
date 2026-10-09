@@ -35,6 +35,14 @@ namespace RogueLike.Items
             go.GetComponent<ItemPickup>().Init(value, pool, true);
         }
 
+        public static void SpawnHealth(Vector3 pos, int heal)
+        {
+            if (heal <= 0) return;
+            var pool = Pool("health");
+            var go = pool.Get(pos);
+            go.GetComponent<ItemPickup>().Init(heal, pool, false, true);
+        }
+
         public static void Register(ItemPickup pickup)
         {
             if (pickup != null) ActivePickups.Add(pickup);
@@ -59,7 +67,7 @@ namespace RogueLike.Items
             int materials = 0;
             foreach (var pickup in snapshot)
             {
-                if (pickup == null || pickup.IsExperience) continue;
+                if (pickup == null || pickup.IsExperience || pickup.IsHealth) continue;
                 materials += pickup.Value;
                 pickup.Despawn();
             }
@@ -79,6 +87,7 @@ namespace RogueLike.Items
         {
             Pool("material").Prewarm(count);
             Pool("experience").Prewarm(count);
+            Pool("health").Prewarm(Mathf.Max(4, count / 4));
         }
 
         /// <summary>销毁本池全部实例并清空（重开新局时调用）。</summary>
@@ -103,29 +112,49 @@ namespace RogueLike.Items
         private static GameObject BuildItemGo(string id)
         {
             bool experience = id == "experience";
-            var sprite = experience ? AssetLoader.LoadExperienceSprite() : null;
+            bool health = id == "health";
+            var sprite = experience ? AssetLoader.LoadExperienceSprite() :
+                health ? AssetLoader.LoadHealingPickupSprite() : AssetLoader.LoadMaterialPickupSprite();
             var prefab = PrefabProvider.Instantiate("Items/item_" + id, Root);
             if (prefab != null)
             {
-                var prefabSr = prefab.GetComponent<SpriteRenderer>();
-                if (prefabSr != null && prefabSr.sprite == null)
-                    prefabSr.sprite = sprite != null ? sprite : SpriteFactory.Circle(new Color(0.35f, 0.95f, 0.45f), 0.16f);
+                ConfigureArtwork(prefab, sprite, experience ? 0.38f : health ? 0.48f : 0.42f);
                 return prefab;
             }
 
             var go = new GameObject("Item_" + id);
             go.transform.SetParent(Root);
             var sr = go.AddComponent<SpriteRenderer>();
-            sr.sprite = sprite != null ? sprite : SpriteFactory.Circle(new Color(0.35f, 0.95f, 0.45f), 0.16f);
-            sr.sortingOrder = 7;
+            sr.enabled = false;
+            ConfigureArtwork(go, sprite, experience ? 0.38f : health ? 0.48f : 0.42f);
             var col = go.AddComponent<CircleCollider2D>();
             col.isTrigger = true;
-            col.radius = experience ? 0.2f : 0.16f;
+            col.radius = experience || health ? 0.2f : 0.16f;
             var rb = go.AddComponent<Rigidbody2D>();
             rb.gravityScale = 0f;
             rb.isKinematic = true;
             go.AddComponent<ItemPickup>();
             return go;
+        }
+
+        private static void ConfigureArtwork(GameObject pickup, Sprite sprite, float worldSize)
+        {
+            var rootRenderer = pickup.GetComponent<SpriteRenderer>();
+            if (rootRenderer != null) rootRenderer.enabled = false;
+            var visual = pickup.transform.Find("PickupArt");
+            if (visual == null)
+            {
+                var artGo = new GameObject("PickupArt");
+                visual = artGo.transform;
+                visual.SetParent(pickup.transform, false);
+            }
+            var renderer = visual.GetComponent<SpriteRenderer>();
+            if (renderer == null) renderer = visual.gameObject.AddComponent<SpriteRenderer>();
+            renderer.sprite = sprite != null ? sprite : SpriteFactory.Circle(new Color(0.5f, 0.95f, 0.45f), 0.16f);
+            renderer.color = Color.white;
+            renderer.sortingOrder = 7;
+            float span = Mathf.Max(renderer.sprite.bounds.size.x, renderer.sprite.bounds.size.y);
+            visual.localScale = Vector3.one * (worldSize / Mathf.Max(0.01f, span));
         }
     }
 }

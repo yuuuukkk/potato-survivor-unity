@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 namespace RogueLike.UI
 {
-    /// <summary>uGUI 运行时构建工厂：画布、事件系统、文本、图片、按钮。全部代码创建，无场景预设依赖。</summary>
+    /// <summary>uGUI 构建工厂；现有场景 UI 优先复用，缺失时才用于回退创建。</summary>
     public static class UIFactory
     {
         public static Canvas MainCanvas;
@@ -44,8 +44,7 @@ namespace RogueLike.UI
             var scaler = go.AddComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(1280f, 720f);
-            scaler.matchWidthOrHeight = 0f;
-            go.AddComponent<UIResponsiveScaler>();
+            scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.Expand;
             go.AddComponent<GraphicRaycaster>();
             return canvas;
         }
@@ -67,7 +66,7 @@ namespace RogueLike.UI
             }
             foreach (var label in canvas.GetComponentsInChildren<Text>(true))
             {
-                label.font = DefaultFont;
+                if (label.font == null) label.font = DefaultFont;
                 if (label.GetComponentInParent<Button>() != null && label.color == Color.white)
                     label.color = ButtonTextColor;
             }
@@ -147,6 +146,34 @@ namespace RogueLike.UI
             return img;
         }
 
+        public static Image CreateCard(Transform parent, Color color, Vector2 anchoredPos, Vector2 sizeDelta)
+        {
+            var image = CreateImage(parent, color, anchoredPos, sizeDelta);
+            if (Theme != null && Theme.roundedCard != null)
+            {
+                image.sprite = Theme.roundedCard;
+                image.type = Image.Type.Sliced;
+            }
+            return image;
+        }
+
+        public static Image CreateShopCard(Transform parent, Vector2 anchoredPos, Vector2 sizeDelta)
+        {
+            var image = CreateImage(parent, Color.white, anchoredPos, sizeDelta);
+            if (Theme != null && Theme.shopCardFrame != null)
+            {
+                image.sprite = Theme.shopCardFrame;
+                image.type = Image.Type.Simple;
+                image.color = Color.white;
+            }
+            else if (Theme != null && Theme.roundedCard != null)
+            {
+                image.sprite = Theme.roundedCard;
+                image.type = Image.Type.Sliced;
+            }
+            return image;
+        }
+
         private static Color PanelTint(Color color)
         {
             // 底图本身已有深色颜料；再次乘深色会变成一整块近黑。
@@ -207,8 +234,21 @@ namespace RogueLike.UI
             slider.maxValue = 1f;
             slider.direction = Slider.Direction.LeftToRight;
 
-            // Background：拉伸填满
-            var bg = CreateImage(rt, bgColor ?? new Color(0.18f, 0.06f, 0.06f), Vector2.zero, Vector2.zero);
+            // Background：Scene 与运行时共用装饰框贴图；框内透明处显示纯色 Fill。
+            var bg = CreateImage(rt, Color.white, Vector2.zero, Vector2.zero);
+            if (Theme != null && Theme.hudBarFrame != null)
+            {
+                bg.sprite = Theme.hudBarFrame;
+                bg.type = Image.Type.Simple;
+                bg.color = Color.white;
+            }
+            else
+            {
+                bg.sprite = null;
+                bg.type = Image.Type.Simple;
+                bg.color = new Color(1f, 1f, 1f, 0f);
+            }
+            bg.raycastTarget = false;
             var bgRt = (RectTransform)bg.transform;
             bgRt.anchorMin = Vector2.zero;
             bgRt.anchorMax = Vector2.one;
@@ -226,6 +266,9 @@ namespace RogueLike.UI
 
             // Fill：初始锚点拉满，Slider 按 value 控制 anchorMax.x（LeftToRight）
             var fill = CreateImage(fillAreaRt, fillColor ?? new Color(0.92f, 0.25f, 0.22f), Vector2.zero, Vector2.zero);
+            // The fill is a flat color, independent from the decorative frame texture.
+            fill.sprite = null;
+            fill.type = Image.Type.Simple;
             var fillRt = (RectTransform)fill.transform;
             fillRt.anchorMin = Vector2.zero;
             fillRt.anchorMax = Vector2.one;

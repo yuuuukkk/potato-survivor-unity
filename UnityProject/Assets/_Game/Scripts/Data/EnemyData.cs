@@ -45,5 +45,7 @@ namespace RogueLike.Data
         public string color = "#00FF88";
         public float radius = 0.45f;
         public int spawnWeight = 10;
+        [Min(1)] public int firstWave = 1;
+        [Min(0)] public int weightGainPerWave;
     }
 }

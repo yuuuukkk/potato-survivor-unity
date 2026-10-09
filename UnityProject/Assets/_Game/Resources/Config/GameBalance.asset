@@ -25,6 +25,7 @@ MonoBehaviour:
     dmgGrowth: 1.15
     speedGrowth: 0.03
     spawnIntervalBase: 1.2
+    spawnBudgetSustainFraction: 0.6
     spawnIntervalMin: 0.35
     maxAliveBase: 20
     maxAlivePerWave: 2
@@ -194,7 +195,6 @@ MonoBehaviour:
   vSyncCount: 0
   normalEnemyScale: 1.12
   heldWeaponDistanceBonus: 0.1
-  maxEquippedModifications: 2
   maxProjectileBounces: 5
   ricochetExtraRangePerBounce: 1
   maxProjectileSizeMultiplier: 2.5
@@ -207,21 +207,29 @@ MonoBehaviour:
   baseCritDamageMultiplier: 2
   basePickupRange: 1.6
   baseMoveSpeed: 3.5
+  playerWalkSquashAmount: 0.055
+  playerWalkStepFrequency: 5.5
+  playerWalkSettleSpeed: 16
+  bossMagicChargeDuration: 0.32
+  bossMagicWarningDuration: 0.8
   screenShakeScale: 0.75
   playerHitShakeDuration: 0.17
   playerHitShakeMagnitude: 0.105
-  playerHitFlashDuration: 0.22
-  playerHitTint: {r: 1, g: 0.38, b: 0.38, a: 1}
+  playerHitTint: {r: 1, g: 0.18, b: 0.18, a: 1}
   playerHitRecoilSpeed: 2.6
   enemyHitFlashDuration: 0.12
-  enemyHitTint: {r: 1, g: 0.55, b: 0.35, a: 1}
+  enemyHitTint: {r: 1, g: 1, b: 1, a: 1}
   enemyHitSquash: 0.16
   enemyHitStunDuration: 0.055
   impactDuration: 0.18
   impactSize: 1
   impactColor: {r: 1, g: 0.86, b: 0.47, a: 1}
   impactShakeMagnitude: 0.025
+  meleeHitShakeMagnitude: 0.018
+  meleeHitShakeDuration: 0.06
   impactMaxActive: 18
+  enemyDeathMaxActive: 30
+  enemyDeathDuration: 0.24
   damageNumberMaxActive: 24
   enemyHitSound: {fileID: 0}
   criticalHitSound: {fileID: 0}

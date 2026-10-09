@@ -1,6 +1,7 @@
 using RogueLike.Core;
 using RogueLike.Data;
 using RogueLike.Enemies;
+using RogueLike.Items;
 using RogueLike.Player;
 using UnityEngine;
 
@@ -64,6 +65,18 @@ namespace RogueLike.Combat
             _controller = GetComponent<PlayerController>();
         }
 
+        private void OnEnable() => EventBus.EnemyKilled += OnEnemyKilled;
+        private void OnDisable() => EventBus.EnemyKilled -= OnEnemyKilled;
+
+        private void OnEnemyKilled(Enemy enemy)
+        {
+            var weapon = enemy != null ? enemy.LastHitWeapon : null;
+            if (weapon == null || !_weapons.Contains(weapon)) return;
+            if (weapon.RegisterKill()) EventBus.RaiseWeaponsChanged();
+            if (weapon.HealthPackChance > 0f && Random.value < weapon.HealthPackChance)
+                ItemPool.SpawnHealth(enemy.transform.position, Mathf.RoundToInt(weapon.HealthPackHeal));
+        }
+
         public void Setup(CharacterData character)
         {
             Reset();
@@ -97,6 +110,12 @@ namespace RogueLike.Combat
         public bool CanApplyModification(WeaponModificationData modification)
         {
             if (modification == null || !modification.IsValid) return false;
+            if (modification.IsBranch)
+            {
+                var parent = GameDatabase.GetWeaponModification(modification.parentId);
+                if (parent == null || parent.IsBranch || ModificationLevel(parent.id) <= 0 ||
+                    parent.weaponId != modification.weaponId) return false;
+            }
             return FindModifiableWeapon(modification) != null &&
                 ModificationLevel(modification.id) < modification.MaxLevel;
         }
@@ -113,13 +132,17 @@ namespace RogueLike.Combat
                  modification.kind == WeaponModificationKind.BoomerangCollector && w.Data.kind == WeaponKind.Boomerang ||
                  modification.kind == WeaponModificationKind.SpringPunch &&
                     w.Data.id == "fist" && w.Data.kind == WeaponKind.Melee ||
+                 (modification.kind == WeaponModificationKind.BloodPackOnKill ||
+                  modification.kind == WeaponModificationKind.KillGrowth) &&
+                    w.Data.kind != WeaponKind.Orbit && w.Data.kind != WeaponKind.Turret ||
                  modification.kind == WeaponModificationKind.VacuumRocket &&
                     w.Data.kind == WeaponKind.Projectile && w.Data.explodeRadius > 0f &&
                     w.Data.attackPattern == WeaponAttackPattern.StandardProjectile ||
                  (modification.kind == WeaponModificationKind.Ricochet ||
                   modification.kind == WeaponModificationKind.Piercing ||
                   modification.kind == WeaponModificationKind.EnlargedProjectile ||
-                  modification.kind == WeaponModificationKind.CharmProjectile) &&
+                  modification.kind == WeaponModificationKind.CharmProjectile ||
+                  modification.kind == WeaponModificationKind.HonkProjectile) &&
                  w.Data.kind == WeaponKind.Projectile &&
                  w.Data.attackPattern == WeaponAttackPattern.StandardProjectile &&
                  (w.Data.explodeRadius <= 0f ||
@@ -157,7 +180,10 @@ namespace RogueLike.Combat
             foreach (var modification in unlocked)
                 if (modification.id == modificationId)
                 {
-                    if (!weapon.SetModificationForGroup(modification, ModificationLevel(modification.id))) return false;
+                    bool equipped = modification.IsBranch
+                        ? weapon.SetBranch(modification, ModificationLevel(modification.id))
+                        : weapon.SetModificationForGroup(modification, ModificationLevel(modification.id));
+                    if (!equipped) return false;
                     EventBus.RaiseWeaponsChanged();
                     return true;
                 }
@@ -227,19 +253,29 @@ namespace RogueLike.Combat
             if (weapon.Level >= MaxTier) return false;
             var other = _weapons.Find(w => w != weapon && w.Data.id == weapon.Data.id && w.Level == weapon.Level);
             if (other == null) return false;
-            if (weapon.ModificationIds.Count == 0)
-            {
-                foreach (var id in other.ModificationIds)
-                {
-                    var modification = GameDatabase.GetWeaponModification(id);
-                    if (modification != null) weapon.ApplyModification(modification, ModificationLevel(id));
-                }
-            }
             weapon.AbsorbValue(other.PaidValue);
-            RemoveOwned(other);
             weapon.LevelUp();
+            CopyCompatibleModifications(other, weapon);
+            RemoveOwned(other);
             EventBus.RaiseWeaponsChanged();
             return true;
+        }
+
+        private void CopyCompatibleModifications(WeaponInstance source, WeaponInstance target)
+        {
+            foreach (var id in source.ModificationIds)
+            {
+                if (target.HasModification(id)) continue;
+                var modification = GameDatabase.GetWeaponModification(id);
+                if (modification != null && !target.HasModificationGroup(modification.exclusiveGroup))
+                    target.ApplyModification(modification, ModificationLevel(id));
+            }
+            foreach (var id in source.BranchIds)
+            {
+                var branch = GameDatabase.GetWeaponModification(id);
+                if (branch != null && target.SelectedBranchId(branch.parentId) == null)
+                    target.SetBranch(branch, ModificationLevel(id));
+            }
         }
 
         private void MergeChain(WeaponInstance upgraded)
@@ -249,8 +285,9 @@ namespace RogueLike.Combat
                 var other = _weapons.Find(w => w != upgraded && w.Data.id == upgraded.Data.id && w.Level == upgraded.Level);
                 if (other == null) break;
                 upgraded.AbsorbValue(other.PaidValue);
-                RemoveOwned(other);
                 upgraded.LevelUp();
+                CopyCompatibleModifications(other, upgraded);
+                RemoveOwned(other);
             }
         }
 
@@ -419,7 +456,7 @@ namespace RogueLike.Combat
                 float angleAllowance = distance > 0.001f ? Mathf.Asin(Mathf.Clamp01(radius / distance)) * Mathf.Rad2Deg : 180f;
                 if (distance > range + radius || Vector2.Angle(direction, toEnemy) > halfAngle + angleAllowance) continue;
                 enemy.TakeDamage(new DamageInfo(damage, gameObject, crit,
-                    Mathf.Max(0f, _stats.Get(StatType.Knockback)), 0.45f));
+                    Mathf.Max(0f, _stats.Get(StatType.Knockback)), 0.45f, weapon));
                 ApplyLifeSteal(damage);
             }
         }
@@ -448,7 +485,7 @@ namespace RogueLike.Combat
                 Vector2 nearestPoint = origin + direction * nearestAlong;
                 if ((center - nearestPoint).sqrMagnitude > Mathf.Pow(width * 0.5f + radius, 2f)) continue;
                 enemy.TakeDamage(new DamageInfo(damage, gameObject, crit,
-                    Mathf.Max(0f, _stats.Get(StatType.Knockback)), 0.7f));
+                    Mathf.Max(0f, _stats.Get(StatType.Knockback)), 0.7f, weapon));
                 ApplyLifeSteal(damage);
             }
         }
@@ -470,11 +507,14 @@ namespace RogueLike.Combat
                     explosive.Launch(target.transform.position, dir, 0, damage, data.projectileSpeed,
                         data.range * weapon.ProjectileRangeMultiplier,
                         data.pierce + weapon.ExtraPierce, data.explodeRadius, crit, false, explosivePool, _stats);
+                    explosive.SetSourceWeapon(weapon);
                     explosive.Detonate();
                     return;
                 }
                 target.TakeDamage(new DamageInfo(damage, gameObject, crit,
-                    Mathf.Max(0f, _stats.Get(StatType.Knockback))));
+                    Mathf.Max(0f, _stats.Get(StatType.Knockback)), 0f, weapon));
+                Projectile.TryHonkPulse(target.transform.position, weapon.HonkChance,
+                    weapon.HonkRadius, weapon.HonkDuration, weapon.HonkMoveMultiplier, weapon.HonkTint);
                 if (target.IsAlive && weapon.CharmChance > 0f && Random.value < weapon.CharmChance)
                     target.ApplyCharm(weapon.CharmDuration, weapon.CharmDamagePerSecond);
                 ApplyLifeSteal(damage);
@@ -498,6 +538,7 @@ namespace RogueLike.Combat
                 flightRange,
                 data.pierce + weapon.ExtraPierce,
                 data.explodeRadius, crit, false, pool, _stats);
+            proj.SetSourceWeapon(weapon);
             if (totalBounces > 0)
                 proj.ConfigureRicochet(totalBounces, weapon.BounceDamageMultiplier);
             if (weapon.VacuumAbsorbLimit > 0)
@@ -510,6 +551,8 @@ namespace RogueLike.Combat
             if (standardBullet)
             {
                 proj.ConfigureCharm(weapon.CharmChance, weapon.CharmDuration, weapon.CharmDamagePerSecond);
+                proj.ConfigureHonk(weapon.HonkChance, weapon.HonkRadius, weapon.HonkDuration,
+                    weapon.HonkMoveMultiplier, weapon.HonkTint);
             }
         }
 
@@ -536,16 +579,19 @@ namespace RogueLike.Combat
                 float tipDistance = (0.5f + Mathf.Clamp(weapon.Data.meleeContactFraction, -0.5f, 0.5f) -
                                      Mathf.Clamp01(weapon.Data.meleeHandleFraction)) * heldSize;
                 Vector2 tip = (Vector2)transform.position + facing * tipDistance;
-                ResolveMeleeAttackHit(weapon, tip, tip);
+                ResolveMeleeAttackHit(weapon, tip, tip, 0.5f, facing);
                 CompleteMeleeAttack(weapon);
             }
         }
 
         /// <summary>只检测剑尖/拳尖在两帧间扫过的路径；同一敌人每次攻击只受击一次。</summary>
-        public void ResolveMeleeAttackHit(WeaponInstance weapon, Vector2 previousTip, Vector2 tip)
+        public void ResolveMeleeAttackHit(WeaponInstance weapon, Vector2 previousTip, Vector2 tip,
+            float swingPhase, Vector2 bladeDirection)
         {
             if (weapon == null || !_meleeAttacks.TryGetValue(weapon, out var attack)) return;
-            if (!attack.WaveEmitted && weapon.MeleeWaveModification != null)
+            float wavePhase = (Mathf.Clamp01(weapon.Data.meleeActiveStart) +
+                               Mathf.Clamp01(weapon.Data.meleeActiveEnd)) * 0.5f;
+            if (!attack.WaveEmitted && weapon.MeleeWaveModification != null && swingPhase >= wavePhase)
             {
                 attack.WaveEmitted = true;
                 var mod = weapon.MeleeWaveModification;
@@ -553,14 +599,17 @@ namespace RogueLike.Combat
                 if (pool != null)
                 {
                     var origin = (Vector3)tip;
+                    Vector2 direction = bladeDirection.sqrMagnitude > 0.001f
+                        ? bladeDirection.normalized : attack.Aim;
                     var go = pool.Get(origin);
                     var wave = go.GetComponent<Projectile>();
-                    wave.Launch(origin, attack.Aim, 0,
+                    wave.Launch(origin, direction, 0,
                         attack.Damage * Mathf.Max(0.1f, mod.waveDamageMultiplier),
                         Mathf.Max(1f, mod.waveSpeed), Mathf.Max(0.5f, mod.waveRange),
                         Mathf.Clamp(mod.wavePierce, 0, 8), 0f, attack.Critical, false, pool, _stats);
+                    wave.SetSourceWeapon(weapon);
                     wave.SetVisualScale(2f);
-                    HitImpact.Spawn(origin, attack.Aim, false);
+                    HitImpact.Spawn(origin, direction, false);
                 }
             }
             float weaponRadius = MeleeAttackGeometry.ContactRadius(weapon.Data, transform.lossyScale);
@@ -579,7 +628,7 @@ namespace RogueLike.Combat
                 bool springEligible = !enemy.IsBoss && enemy.Data != null && !enemy.Data.isElite;
                 float knockback = springEligible ? attack.Knockback :
                     Mathf.Max(0f, attack.Knockback - weapon.SpringKnockback);
-                enemy.TakeDamage(new DamageInfo(attack.Damage, gameObject, attack.Critical, knockback, 1f));
+                enemy.TakeDamage(new DamageInfo(attack.Damage, gameObject, attack.Critical, knockback, 1f, weapon));
                 if (springEligible && enemy.IsAlive && attack.SpringCollisionDamage > 0f && knockback > 0f)
                     enemy.ArmSpringCollision(attack.SpringCollisionDamage, attack.SpringCollisionWindow, gameObject);
                 ApplyLifeSteal(attack.Damage);

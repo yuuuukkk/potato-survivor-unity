@@ -22,6 +22,8 @@ namespace RogueLike.Core
         public int LastWaveKills { get; private set; }
         public float LastWaveHpPercent { get; private set; } = 1f;
         private int _killsAtWaveStart;
+        private readonly System.Collections.Generic.List<int> _pendingWaveUpgrades = new System.Collections.Generic.List<int>();
+        private bool _finishRunAfterWaveUpgrades;
 
         public PlayerController Player { get; set; }
         public WaveDirector Director { get; set; }
@@ -44,21 +46,15 @@ namespace RogueLike.Core
             EventBus.LevelUpChoiceApplied -= OnLevelUpChoiceApplied;
         }
 
-        /// <summary>升级瞬间：暂停游戏，等待四选一（LevelUpUI 选择后恢复）。防重：已在 LevelUp 状态则忽略重复事件。</summary>
+        /// <summary>波内升级只记录，卡片统一在波次结束后选择。</summary>
         private void OnLevelUp(int level)
         {
-            if (State == GameState.LevelUp)
-            {
-                return;
-            }
-            SetState(GameState.LevelUp);
-            Time.timeScale = 0f;
+            if (!_pendingWaveUpgrades.Contains(level)) _pendingWaveUpgrades.Add(level);
         }
 
         private void OnLevelUpChoiceApplied()
         {
-            Time.timeScale = 1f;
-            SetState(GameState.Playing);
+            CompleteWaveEndUpgrade();
         }
 
         public void SetState(GameState state)
@@ -80,6 +76,8 @@ namespace RogueLike.Core
             LastWaveKills = 0;
             LastWaveHpPercent = 1f;
             _killsAtWaveStart = 0;
+            _pendingWaveUpgrades.Clear();
+            _finishRunAfterWaveUpgrades = false;
             if (Shop != null) Shop.ResetForNewRun();
 
             EventBus.RaiseMaterialsChanged(Materials);
@@ -123,8 +121,35 @@ namespace RogueLike.Core
             AddMaterials(cfg.waveBonusBase + cfg.waveBonusPerWave * Wave);
             AddMaterials(Director.CompletedChallengeReward);
             EventBus.RaiseWaveEnded(Wave, Materials);
-            if (Wave >= cfg.waveCount)
+            _finishRunAfterWaveUpgrades = Wave >= cfg.waveCount;
+            if (_pendingWaveUpgrades.Count > 0)
             {
+                Time.timeScale = 0f;
+                SetState(GameState.LevelUp);
+                EventBus.RaiseWaveEndUpgradeReady(_pendingWaveUpgrades[0]);
+                return;
+            }
+            ContinueAfterWaveUpgrades();
+        }
+
+        public void CompleteWaveEndUpgrade()
+        {
+            if (State != GameState.LevelUp || _pendingWaveUpgrades.Count == 0) return;
+            _pendingWaveUpgrades.RemoveAt(0);
+            if (_pendingWaveUpgrades.Count > 0)
+            {
+                EventBus.RaiseWaveEndUpgradeReady(_pendingWaveUpgrades[0]);
+                return;
+            }
+            Time.timeScale = 1f;
+            ContinueAfterWaveUpgrades();
+        }
+
+        private void ContinueAfterWaveUpgrades()
+        {
+            if (_finishRunAfterWaveUpgrades)
+            {
+                _finishRunAfterWaveUpgrades = false;
                 RunWon = true;
                 Director.StopRun();
                 ItemPool.ClearActivePickups();

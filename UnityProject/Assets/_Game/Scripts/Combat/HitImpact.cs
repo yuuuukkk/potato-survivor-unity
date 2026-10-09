@@ -9,20 +9,22 @@ namespace RogueLike.Combat
     {
         private static Sprite _streak;
         private readonly SpriteRenderer[] _rays = new SpriteRenderer[3];
+        private SpriteRenderer _symbol;
         private ObjectPool _pool;
         private float _elapsed;
         private float _duration;
         private float _size;
         private Color _color;
 
-        public static void Spawn(Vector3 position, Vector2 direction, bool critical, bool playerHit = false)
+        public static void Spawn(Vector3 position, Vector2 direction, bool critical, bool playerHit = false,
+            Color? accent = null, Sprite symbol = null)
         {
             var balance = GameDatabase.Balance;
             var pool = GamePools.Get("hit_impact", CreateGo);
             if (pool.ActiveCount >= (balance != null ? balance.impactMaxActive : 36)) return;
             var go = pool.Get(position);
             if (go == null) return;
-            go.GetComponent<HitImpact>().Show(pool, position, direction, critical, playerHit, balance);
+            go.GetComponent<HitImpact>().Show(pool, position, direction, critical, playerHit, balance, accent, symbol);
         }
 
         private static GameObject CreateGo()
@@ -40,18 +42,31 @@ namespace RogueLike.Combat
                 renderer.sortingOrder = 9;
                 impact._rays[i] = renderer;
             }
+            var symbolGo = new GameObject("BuildEffectSymbol");
+            symbolGo.transform.SetParent(go.transform, false);
+            impact._symbol = symbolGo.AddComponent<SpriteRenderer>();
+            impact._symbol.sortingOrder = 10;
             return go;
         }
 
         private void Show(ObjectPool pool, Vector3 position, Vector2 direction, bool critical,
-            bool playerHit, GameBalanceSO balance)
+            bool playerHit, GameBalanceSO balance, Color? accent, Sprite symbol)
         {
             _pool = pool;
             _elapsed = 0f;
             _duration = Mathf.Max(0.04f, balance != null ? balance.impactDuration : 0.18f);
             _size = Mathf.Max(0.1f, balance != null ? balance.impactSize : 1f) * (critical ? 1.4f : 1f);
-            _color = playerHit ? new Color(1f, 0.35f, 0.32f) :
-                balance != null ? balance.impactColor : new Color(1f, 0.86f, 0.47f);
+            _color = accent ?? (playerHit ? new Color(1f, 0.35f, 0.32f) :
+                balance != null ? balance.impactColor : new Color(1f, 0.86f, 0.47f));
+            _symbol.sprite = symbol;
+            _symbol.enabled = symbol != null;
+            if (symbol != null)
+            {
+                float spriteSize = Mathf.Max(symbol.bounds.size.x, symbol.bounds.size.y, 0.01f);
+                _symbol.transform.localScale = Vector3.one * (0.48f / spriteSize);
+                _symbol.transform.localRotation = Quaternion.identity;
+                _symbol.color = Color.white;
+            }
             transform.position = position;
             if (direction.sqrMagnitude < 0.001f) direction = Vector2.right;
             transform.rotation = Quaternion.Euler(0f, 0f, Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg);
@@ -84,6 +99,12 @@ namespace RogueLike.Combat
                 var tint = _color;
                 tint.a *= 1f - progress;
                 ray.color = tint;
+            }
+            if (_symbol.enabled)
+            {
+                var tint = Color.white;
+                tint.a = 1f - progress;
+                _symbol.color = tint;
             }
         }
     }

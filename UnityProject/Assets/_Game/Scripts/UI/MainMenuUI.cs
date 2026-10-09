@@ -66,8 +66,7 @@ namespace RogueLike.UI
             _panel = (RectTransform)UIFactory.CreateImage(transform,
                 new Color(0.13f, 0.13f, 0.21f, 0.99f), Vector2.zero, new Vector2(1120f, 640f)).rectTransform;
 
-            UIFactory.CreateText(_panel, "土豆幸存者", 56, new Color(1f, 0.85f, 0.45f), new Vector2(0f, 250f), new Vector2(600f, 70f));
-            UIFactory.CreateText(_panel, "自动攻击 · 走位生存 · 商店构筑 · 20 波", 20, new Color(0.75f, 0.75f, 0.82f), new Vector2(0f, 196f), new Vector2(700f, 30f));
+            UIFactory.CreateText(_panel, "土豆幸存者", 56, new Color(1f, 0.85f, 0.45f), new Vector2(0f, 200f), new Vector2(600f, 70f));
             UIFactory.CreateText(_panel, "选择角色", 24, Color.white, new Vector2(0f, 130f), new Vector2(300f, 32f));
 
             var gridGo = new GameObject("CharGrid");
@@ -76,7 +75,7 @@ namespace RogueLike.UI
             _charGrid.anchoredPosition = new Vector2(0f, 10f);
             _charGrid.sizeDelta = new Vector2(700f, 175f);
 
-            _descText = UIFactory.CreateText(_panel, "", 16, new Color(0.75f, 0.75f, 0.82f), new Vector2(0f, -125f), new Vector2(800f, 50f));
+            _descText = UIFactory.CreateText(_panel, "", 19, new Color(0.85f, 0.84f, 0.86f), new Vector2(0f, -125f), new Vector2(800f, 50f));
 
             _startBtn = UIFactory.CreateButton(_panel, "开始游戏", null, new Vector2(0f, -210f), new Vector2(260f, 58f), 26);
             _quitBtn = UIFactory.CreateButton(_panel, "退出", null, new Vector2(0f, -275f), new Vector2(160f, 40f), 18);
@@ -84,6 +83,8 @@ namespace RogueLike.UI
 
         private void HookButtons()
         {
+            SetButtonLabelColor(_startBtn);
+            SetButtonLabelColor(_quitBtn);
             if (_startBtn != null)
                 _startBtn.onClick.AddListener(() =>
                 {
@@ -94,10 +95,17 @@ namespace RogueLike.UI
             if (_settingsBtn != null) _settingsBtn.onClick.AddListener(OpenSettings);
         }
 
+        private static void SetButtonLabelColor(Button button)
+        {
+            if (button == null) return;
+            foreach (var label in button.GetComponentsInChildren<Text>(true))
+                label.color = UIFactory.ButtonTextColor;
+        }
+
         private void BuildSettingsButton()
         {
             _settingsBtn = UIFactory.CreateButton(_panel, "设置",
-                null, new Vector2(460f, 260f), new Vector2(124f, 44f), 18);
+                null, new Vector2(390f, 200f), new Vector2(124f, 44f), 18);
         }
 
         private void BuildSettingsPanel()
@@ -256,11 +264,7 @@ namespace RogueLike.UI
         /// <summary>角色按钮按数据动态生成进容器（内容随 characters.json 变化）。</summary>
         private void RefreshCharButtons()
         {
-            _charGrid.anchoredPosition = new Vector2(0f, 10f);
-            _charGrid.sizeDelta = new Vector2(700f, 175f);
-            if (_descText != null) _descText.rectTransform.anchoredPosition = new Vector2(0f, -125f);
-            if (_startBtn != null) ((RectTransform)_startBtn.transform).anchoredPosition = new Vector2(0f, -210f);
-            if (_quitBtn != null) ((RectTransform)_quitBtn.transform).anchoredPosition = new Vector2(0f, -275f);
+            if (_charGrid == null) return;
             for (int i = _charGrid.childCount - 1; i >= 0; i--)
                 Destroy(_charGrid.GetChild(i).gameObject);
             _charButtons.Clear();
@@ -273,17 +277,20 @@ namespace RogueLike.UI
                 var btn = UIFactory.CreateButton(_charGrid, "", () => SelectCharacter(idx),
                     new Vector2(x, 0f), new Vector2(190f, 150f), 18);
                 var portrait = UIFactory.CreateImage(btn.transform, Color.white,
-                    new Vector2(0f, 25f), new Vector2(96f, 96f));
+                    new Vector2(0f, 27f), new Vector2(82f, 82f));
                 portrait.sprite = AssetLoader.LoadPlayerSprite(c.id);
                 if (portrait.sprite != null) portrait.type = Image.Type.Simple;
                 portrait.preserveAspect = true;
                 if (portrait.sprite == null) portrait.color = new Color(0.45f, 0.4f, 0.32f);
-                UIFactory.CreateText(btn.transform, c.displayName, 20, UIFactory.ButtonTextColor,
-                    new Vector2(0f, -56f), new Vector2(175f, 28f));
+                UIFactory.CreateText(btn.transform, c.displayName, 22, UIFactory.ButtonTextColor,
+                    new Vector2(0f, -43f), new Vector2(175f, 32f));
                 _charButtons.Add(btn);
             }
 
-            if (GameDatabase.Characters.Count > 0) SelectCharacter(0);
+            bool hasCharacters = GameDatabase.Characters.Count > 0;
+            if (_startBtn != null) _startBtn.interactable = hasCharacters;
+            if (hasCharacters) SelectCharacter(Mathf.Clamp(_selectedIndex, 0, GameDatabase.Characters.Count - 1));
+            else if (_descText != null) _descText.text = "角色数据尚未加载。";
         }
 
         private void SelectCharacter(int index)
@@ -304,11 +311,18 @@ namespace RogueLike.UI
         {
             if (_settingsOpen) CloseSettings();
             bool show = state == GameState.MainMenu;
+            if (show && _charButtons.Count != GameDatabase.Characters.Count)
+                RefreshCharButtons();
             _panel.gameObject.SetActive(show);
             if (show) UIFactory.FocusFirstButton(_panel);
         }
 
-        public void Show() => _panel.gameObject.SetActive(true);
+        public void Show()
+        {
+            if (_charButtons.Count != GameDatabase.Characters.Count)
+                RefreshCharButtons();
+            _panel.gameObject.SetActive(true);
+        }
         public void Hide() => _panel.gameObject.SetActive(false);
     }
 }
